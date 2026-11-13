@@ -149,7 +149,7 @@ function albHTML() {
   const ends = WEEK[LANG].ui.endings;
   return sec(A.meetings, Object.keys(COMBOS), 'c', k => COMBOS[k].t) +
          sec(A.scenes, Object.keys(SCENE_AT), 's', k => SCENE_AT[k]) +
-         sec(A.caught, ['fakemom', 'faketeacher', 'fakedog', 'fakeboss'], 'd', k => STR[LANG].v[k].caught) +
+         sec(A.caught, ['fakemom', 'faketeacher', 'fakedog', 'fakeboss', 'agent'], 'd', k => STR[LANG].v[k].album || STR[LANG].v[k].caught) +
          sec(A.endings, ends.map((_, i) => String(i)), 'e', k => ends[+k]);
 }
 function shopHTML() {

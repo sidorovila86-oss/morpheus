@@ -129,19 +129,41 @@ canvas{image-rendering:pixelated;display:block}
 /* the dream */
 #dreamov{background:#1a1726}
 #dreambg{position:absolute;left:0;top:0}
-#guests{position:absolute;left:0;right:0;top:24px;height:80px;display:flex;justify-content:center;gap:18px}
-#guests .g{position:relative;width:64px;height:76px;opacity:0;transform:translateY(10px);transition:all .5s cubic-bezier(.3,1.6,.5,1)}
-#guests .g.in{opacity:1;transform:none;animation:float 2.4s steps(3) infinite alternate}
-#guests .g .pl{position:absolute;right:-10px;bottom:-6px}
-#guests .g .fl{position:absolute;left:0;right:0;top:-9px;text-align:center;font-size:var(--fs6);color:#c7b3e6;letter-spacing:1px}
+/* the dream scene: one frame of the reel at a time, lit by a single spotlight */
+#scene{position:absolute;left:6px;top:20px;width:312px;height:152px;overflow:hidden;transform:scale(1.5);transform-origin:0 0;opacity:0;transition:opacity .6s ease;filter:saturate(.88);
+  -webkit-mask-image:radial-gradient(ellipse 56% 58% at 50% 50%,#000 64%,rgba(0,0,0,.6) 84%,transparent 100%);mask-image:radial-gradient(ellipse 56% 58% at 50% 50%,#000 64%,rgba(0,0,0,.6) 84%,transparent 100%)}
+#scene.on{opacity:1}
+#scene canvas{position:absolute;left:0;top:0;width:312px;height:152px;image-rendering:pixelated}
+#scene .layer{position:absolute;left:0;top:0;display:none;z-index:2}
+#scene #slit,#scene #sglow{image-rendering:auto}
+#slit{z-index:3}#sglow{z-index:3;mix-blend-mode:screen;filter:blur(5px);animation:breathe 4.5s ease-in-out infinite alternate}
+@keyframes breathe{from{opacity:.75}to{opacity:1}}
+#sgrade{position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse at 45% 35%,rgba(255,214,160,.16),rgba(120,90,170,.12) 70%);mix-blend-mode:soft-light}
+#scene .mote{position:absolute;width:2px;height:2px;background:#ffe9b8;z-index:3;pointer-events:none;box-shadow:0 0 3px #ffd890}
+#scene .steam{position:absolute;width:2px;height:2px;background:#ece6f4;z-index:2;pointer-events:none}
+#scene .actor{position:absolute;bottom:-6px;width:64px;height:76px;opacity:0;transform:translateY(5px);filter:blur(3px);transition:transform 1.4s ease-out,opacity 1.2s ease,filter 1.4s ease}
+#scene .actor.in{opacity:1;transform:none;filter:none}
+#scene .actor.cut{-webkit-mask-image:linear-gradient(#000 62%,transparent 96%);mask-image:linear-gradient(#000 62%,transparent 96%)}
+#scene .actor img{display:block;animation:float 2.4s steps(3) infinite alternate}
+#scene .actor.dim img{filter:brightness(.35) saturate(.6)}
+#scene .actor.poof{animation:poof .5s steps(4)}
+@keyframes poof{30%{transform:scale(1.15,.85)}60%{transform:scale(.9,1.1)}}
+#slab{position:absolute;left:40px;top:254px;max-width:140px;white-space:nowrap;overflow:hidden;z-index:2;font-size:var(--fs6);color:#e8dcff;letter-spacing:1px;text-shadow:1px 1px 0 #000}
+#slab b{color:#f0c860;font-weight:400}
+#scene .blk{position:absolute;inset:0;background:#05030a;transition:opacity .45s;z-index:4}
+#scene .puff{position:absolute;width:3px;height:3px;background:#efe6ff;z-index:3;pointer-events:none}
 @keyframes float{to{transform:translateY(-3px)}}
-#g2wrap{position:absolute;left:201px;top:122px}
-#dtext{position:absolute;left:56px;top:192px;width:348px;box-sizing:border-box;min-height:30px;padding:5px 10px 8px;color:#fff6dc;font-size:var(--fs8);line-height:11px;text-align:center;
-  background:rgba(18,12,30,.86);border:1px solid #6a5a92;box-shadow:0 0 0 1px #120c1e;text-shadow:1px 1px 0 #000}
+#reelp{position:absolute;left:170px;top:250px;width:200px;z-index:2;display:flex;flex-wrap:nowrap;gap:3px;justify-content:flex-end}
+#reelp .ch{min-width:20px;padding:0 3px;white-space:nowrap;height:18px;box-sizing:border-box;border:1px solid #3a3150;background:#120e17;font-size:var(--fs6);color:#6a5f80;text-align:center;line-height:16px}
+#reelp .ch.on{border-color:#f0c860;color:#fff6dc;background:#2a2040}
+#reelp .ch.done{color:#a89cc0;border-color:#5a4a82}
+#g2wrap{position:absolute;left:398px;top:196px;z-index:2}
+#dtext{position:absolute;left:40px;bottom:24px;width:330px;z-index:2;box-sizing:border-box;min-height:30px;padding:5px 10px 8px;color:#fff6dc;font-size:var(--fs8);line-height:11px;text-align:center;
+  background:rgba(18,12,30,.78);border:1px solid rgba(150,130,200,.45);box-shadow:0 0 0 1px #120c1e;text-shadow:1px 1px 0 #000}
 #dtext:empty{display:none}
 #dtext .more{position:absolute;right:5px;bottom:1px;color:#e3c25a;animation:blink 1s steps(2) infinite}
 #dreamov.wait{cursor:pointer}
-#dtitle{position:absolute;left:0;right:0;top:4px;text-align:center;font-size:var(--fs8);color:#9a8fb0;letter-spacing:1px}
+#dtitle{position:absolute;left:0;right:0;top:4px;z-index:2;text-align:center;font-size:var(--fs8);color:#9a8fb0;letter-spacing:1px}
 .pop{position:absolute;font:600 var(--fs8) var(--font);pointer-events:none;animation:pop 1.1s ease-out forwards;text-shadow:1px 1px 0 #1a1726;z-index:5}
 @keyframes pop{from{transform:translateY(0);opacity:1}to{transform:translateY(-14px);opacity:0}}
 #morning .paper{left:96px;top:14px;width:268px;max-height:222px;overflow-y:auto;scrollbar-width:thin}
@@ -245,7 +267,9 @@ canvas{image-rendering:pixelated;display:block}
   <div class="ov" id="dreamov">
     <canvas id="dreambg" width="480" height="270"></canvas>
     <div id="dtitle"></div>
-    <div id="guests"></div>
+    <div id="scene"><canvas id="sbg" width="312" height="152"></canvas><img id="sfg" class="layer" alt=""><img id="smira" class="layer" src="../art/px/out/v_mira_back.png" alt=""><canvas id="slit" width="78" height="38"></canvas><canvas id="sglow" width="78" height="38"></canvas><div id="sgrade"></div></div>
+    <div id="slab"></div>
+    <div id="reelp"></div>
     <div id="g2wrap"><canvas id="g2" width="78" height="68"></canvas></div>
     <div id="dtext"></div>
   </div>
@@ -280,18 +304,18 @@ let SAVE=null;try{SAVE=JSON.parse(localStorage.getItem('morpheus.week')||'null')
 const NIGHT=SAVE&&SAVE.night>=1&&SAVE.night<=5?SAVE.night:1;
 const RESULTS=SAVE&&Array.isArray(SAVE.results)?SAVE.results.slice(0,NIGHT-1):[];
 const NIGHTS=[
- {film:3,queue:['sheep','mom','shonen','dminus','biscuit','giveaway','kevin','comet'],
+ {film:3,queue:['sheep','mom','shonen','dminus','agent','biscuit','giveaway','kevin','comet'],
   goal:{test:S=>S.fear<50,k:'fear',dir:-1}},                                              // Mon: presentation -> calm
- {film:3,queue:['mom','grandma','kevin','fakemom','sigma','sheep','streamer','comet','dminus'],
+ {film:3,queue:['mom','grandma','kevin','agent2','fakemom','sigma','sheep','streamer','comet','dminus'],
   eff:{mom:{love:15,fear:5,past:5},comet:{hope:15,love:5},dminus:{fear:15,love:-5},sheep:{fear:-10,love:5}},
   goal:{test:S=>S.love>=50,k:'love',dir:1}},                                              // Tue: Mom's voicemail -> closeness
- {film:4,queue:['grayline','magical','faketeacher','comet','dminus','crypto','okafor','mom','giveaway','kevin'],
+ {film:4,queue:['grayline','magical','faketeacher','comet','agent3','dminus','crypto','okafor','mom','giveaway','kevin'],
   eff:{grayline:{fear:10,hope:-15},okafor:{hope:20,past:5,fear:5},comet:{hope:20,past:5,fear:-5},dminus:{fear:15,hope:-10},mom:{love:10,hope:-10},biscuit:{love:10,past:10},sheep:{fear:-10,hope:-5}},
   goal:{test:S=>S.hope>=50,k:'hope',dir:1}},                                              // Wed: drawing class flyer -> hope
- {film:4,queue:['fakedog','grayline','truck','biscuit','sheep','mom','okafor','magical','dminus','kevin'],
+ {film:4,queue:['fakedog','truck','biscuit','grayline','sheep','mom','agent4','okafor','magical','dminus','kevin'],
   eff:{magical:{past:15,hope:5},grayline:{past:-15,fear:5},okafor:{past:10,hope:5,love:5},biscuit:{past:20,love:10},sheep:{fear:-5,past:-5},mom:{past:10,love:10},dminus:{past:10,fear:10},comet:{hope:10,past:5}},
   goal:{test:S=>S.past>=30&&S.past<=65,k:'past',dir:S=>S.past>65?-1:1}},                 // Thu: Biscuit anniversary -> remember, don't drown
- {film:5,queue:['kevin','fakeboss','grayline','mom','streamer','fakemom','comet','okafor','truck','fakedog','biscuit','sheep'],
+ {film:5,queue:['kevin','fakeboss','grayline','mom','streamer','fakemom','comet','agent5','okafor','truck','fakedog','biscuit','sheep'],
   eff:{truck:{past:-10,hope:10,fear:5},streamer:{love:10,fear:-5},grayline:{fear:15,hope:-5,love:-5},okafor:{hope:10,fear:-5}},
   goal:{test:S=>MK.every(k=>S[k]>=25&&S[k]<=75),k:null,dir:null}},                         // Fri: "let me sleep" -> balance
 ];
@@ -401,6 +425,15 @@ const V=[
   why:'Somebody has to make her practise. Talent is nothing without scales. Sit. Back straight.',
   eff:{fear:10,past:10,hope:-5}, think:'A teacher. Beret, glasses, a pencil behind the ear.',
   scene:'Ms. Okata made Mira play scales on a piano with no keys. Mira couldn\'t remember ever taking music lessons.'},
+  // AGENT DOZE: a dream-infiltration spy, one attempt per night, a better disguise each time.
+  // Mon: himself. Tue: a Comet costume (sunglasses still on). Wed: Mom with stubble and an earpiece.
+  // Thu/Fri: perfect copies (copy:true reuses the real sprite); only memory questions catch him: every answer is wrong.
+  // Texts live in lang.js (STR.v.agent…agent5).
+ {id:'agent',agent:1,pitch:230,eff:{fear:10,hope:-10}},
+ {id:'agent2',agent:1,of:'comet',pitch:330,eff:{love:-10,hope:-5,fear:5}},
+ {id:'agent3',agent:1,of:'mom',pitch:420,eff:{hope:-15,fear:5}},
+ {id:'agent4',agent:1,of:'grayline',copy:1,pitch:200,eff:{past:-15,fear:10}},
+ {id:'agent5',agent:1,of:'kevin',copy:1,pitch:420,eff:{fear:10,hope:-10,love:-5}},
 ];
 {const POOL=V.splice(0);NT.queue.forEach(id=>{const b=POOL.find(v=>v.id===id);V.push({...b,eff:NT.eff&&id in NT.eff?NT.eff[id]:b.eff})})}
 const COMBOS={
@@ -491,6 +524,8 @@ const sfx={
   away(){noise(.25,.1,'bandpass',500,.8,0,1600)},
   dream(){[262,330,392,494,587].forEach((f,i)=>{tone('sine',f,0,2.2,.05,i*.18);tone('triangle',f*2,0,1.2,.015,i*.18)})},
   tick(){tone('triangle',880,0,.05,.05)},
+  spot(){[784,1175,1568].forEach((f,i)=>tone('sine',f,0,1.1,.025,i*.07))},     // a soft dreamy chime as the light comes up
+  poof(){noise(.4,.3,'bandpass',1400,.7,0,300);tone('square',420,90,.25,.05)},
   good(){[784,988,1318].forEach((f,i)=>tone('square',f,0,.16,.04,i*.09))},
   bad(){tone('square',247,196,.16,.06);tone('square',185,147,.3,.06,.14)},
   click(){tone('square',1800,900,.02,.05);noise(.03,.12,'highpass',3000)},
@@ -1145,11 +1180,11 @@ function thinkRelease(){thinkHeld=false;const tk=thinkTok;setTimeout(()=>{if(tk=
    THE NIGHT
    ========================================================= */
 let qi=0,cur=null,ticket=null,asked=false;
-const spr=v=>v.of&&NIGHT===5?v.of:v.id;          // Friday: look-alikes are perfect copies, only memory tells them apart
+const spr=v=>v.of&&(NIGHT===5||v.copy)?v.of:v.id;          // Friday: look-alikes are perfect copies, only memory tells them apart
 /* MEMORY CHECK: her people answer questions from Mira's memories; a look-alike gets 2 of 3 wrong.
    Questions are limited per night. Habits show for free in Morpheus' thoughts. */
 let checks=NIGHT===5?5:3,checkHinted=false;
-const QZ=()=>STR[LANG].quiz,qkey=v=>v&&(v.of||v.id);
+const QZ=()=>STR[LANG].quiz,qkey=v=>v&&((v.of||v.id)==='kevin'&&NIGHT<5?null:v.of||v.id);   // Kevin only gets questions on Friday, when there are two of him
 function hideAsk(){$('ask').style.display='none';$('check').style.display='none';$('quiz').style.display='none'}
 function checkBtn(){$('check').textContent=U.check(checks);$('check').classList.toggle('off',!checks)}
 function quizRender(){$('quiz').innerHTML=QZ()[qkey(cur)].map((x,i)=>`<span class="qz${cur.qa.has(i)?' done':''}" data-i="${i}">${x.q}</span>`).join('')}
@@ -1172,7 +1207,7 @@ async function nextVisitor(){
   think(cur.think);
   await say(cur.name,cur.arrive,cur.pitch);
   $('ask').style.display='block';
-  if(QZ()[qkey(cur)]){cur.qa=new Set();cur.wrong=cur.of?new Set([0,1,2].sort(()=>Math.random()-.5).slice(0,2)):null;checkBtn();$('check').style.display='block';
+  if(QZ()[qkey(cur)]){cur.qa=new Set();cur.wrong=cur.agent?new Set([0,1,2]):cur.of?new Set([0,1,2].sort(()=>Math.random()-.5).slice(0,2)):null;checkBtn();$('check').style.display='block';
     if(NIGHT===2&&!checkHinted){checkHinted=true;think(U.checkHint)}}
   busy=false;
 }
@@ -1184,7 +1219,7 @@ $('quiz').onclick=async e=>{const el=e.target.closest('.qz');if(!el||!cur||busy)
   if(!v.qa.has(i)){if(!checks){think(U.noChecks);return}checks--;v.qa.add(i);checkBtn()}      // asking again is free
   const x=QZ()[qkey(v)][i];$('quiz').style.display='none';busy=true;sfx.hover();
   await say(U.me,x.q,300);await sleep(600*TS()+200);if(cur!==v){busy=false;return}
-  await say(v.name,v.wrong&&v.wrong.has(i)?x.f:x.a,v.pitch);busy=false};
+  await say(v.name,v.qf?v.qf[i]:v.wrong&&v.wrong.has(i)?x.f:x.a,v.pitch);busy=false};
 $('ask').onclick=async()=>{if(asked||!cur||busy)return;asked=true;$('ask').style.display='none';sfx.hover();busy=true;await say(cur.name,cur.why,cur.pitch);busy=false};
 
 /* a memory photo: polaroid on a starry dream backdrop, paper clip, name in her handwriting */
@@ -1221,7 +1256,7 @@ async function dismiss(){
   if(!cur||!ticket)return;const v=cur,tk=ticket;ticket=null;busy=true;preview(null);hideAsk();
   tk.o.locked=()=>true;tk.tx=230;tk.ty=96;sfx.away();
   await say(v.name,v.id==='biscuit'?U.byeDog:v.id==='kevin'?U.byeKevin:U.bye,v.pitch);
-  if(v.of){albFind('d',v.id);think(v.caught)}
+  if(v.caught){albFind('d',v.agent?'agent':v.id);think(v.caught)}
   tk.el.style.transition='opacity .3s';tk.el.style.opacity=0;
   const vis=$('visitor');vis.classList.remove('float');vis.classList.add('vanish');wfxBurst('out');await sleep(620);vis.style.opacity=0;vis.classList.remove('vanish');tk.dead=true;tk.el.remove();
   $('bubble').style.opacity=0;cur=null;nextVisitor();
@@ -1289,7 +1324,7 @@ function drawDreamBG(){
   c.fillStyle='#eee8ff';for(let i=0;i<70;i++){const x=Math.random()*480|0,y=Math.random()*150|0;c.fillRect(x,y,1,1);if(i%9===0){c.fillRect(x-1,y,3,1);c.fillRect(x,y-1,1,3)}}
 }
 function pop(k,d){const i=MK.indexOf(k);const el=document.createElement('div');el.className='pop';el.textContent=(d>0?'+':'')+d;
-  el.style.left=(201+GW+4)+'px';el.style.top=(122+3+i*ROW)+'px';el.style.color=d>0?'#a8e0a0':'#f0a090';$('dreamov').appendChild(el);setTimeout(()=>el.remove(),1200)}
+  const gw=$('g2wrap');el.style.left=(gw.offsetLeft-24)+'px';el.style.top=(gw.offsetTop+3+i*ROW)+'px';el.style.color=d>0?'#a8e0a0':'#f0a090';$('dreamov').appendChild(el);setTimeout(()=>el.remove(),1200)}
 async function apply(e){for(const k of Object.keys(e)){S[k]=clamp(S[k]+e[k],0,100);pop(k,e[k]);sfx.tick();await sleep(260)}}
 let dSkip=false,dGo=null;
 $('dreamov').addEventListener('pointerdown',()=>{if(dGo){const f=dGo;dGo=null;f()}else dSkip=true});
@@ -1319,28 +1354,110 @@ async function endNight(){
   busy=true;dreaming=true;$('bubble').style.opacity=0;hideAsk();info();
   await think(U.lightsThink);await sleep(400);
   drawDreamBG();const ov=$('dreamov');ov.style.opacity=0;ov.classList.add('on');ov.style.transition='opacity 1.2s';void ov.offsetWidth;ov.style.opacity=1;sfx.dream();
-  const g=$('guests');g.innerHTML='';$('dtext').textContent='';
+  $('dtext').textContent='';sceneClear();$('scene').classList.remove('on');
+  $('reelp').innerHTML=frames.map((f,i)=>`<div class="ch">${FL(i)}</div>`).join('');
   await sleep(1300);
   for(const f of frames){
-    const pl=f.p?f.p.id:null;
-    const d=document.createElement('div');d.className='g';
-    d.innerHTML=`<div class="fl">${FL(f.i)}</div>`+(f.t?`<img src="../art/px/out/v_${spr(f.t.v)}.png" width="64" height="76">`:'')+(pl?`<img class="pl" src="${f.p.src.toDataURL()}" width="30" height="24">`:'');
-    g.appendChild(d);await sleep(60);d.classList.add('in');sfx.pick();
-    if(!f.t){await dline(U.blank(FL(f.i)));await apply({hope:-5,fear:5});await tap();continue}
+    const pl=f.p?f.p.id:null,fin=f.i===NF-1;
+    reelMark(f.i);
+    $('slab').innerHTML=(fin?`<b>${FL(f.i)}</b>`:FL(f.i))+(pl?' · '+PLACES[pl].name:'');
+    await sceneUp(pl||'none');
+    if(!f.t){await sleep(300);await spotOn([SC.solo],'#8a7aa8',true);await dline(U.blank(FL(f.i)));await apply({hope:-5,fear:5});await tap();await sceneDown();continue}
     const v=f.t.v;let e=frameEff(v.e,f.p);
-    if(f.i===NF-1)for(const k in e)e[k]*=2;
+    if(fin)for(const k in e)e[k]*=2;
     const txt=(pl&&SCENE_AT[v.id+'@'+pl])||(v.scene+(pl?AT_TAIL[pl]:''));
     if(pl&&SCENE_AT[v.id+'@'+pl])albFind('s',v.id+'@'+pl);
     CONTRIB.push({who:pl?WU().at(v.name,PLACES[pl].name):v.name,e:{...e}});
-    await dline((f.i===NF-1?U.finale:'')+txt);await apply(e);await tap()}
+    const a=actor(spr(v),SC.solo);await sleep(250);a.classList.add('in');sfx.pick();await sleep(700);
+    await spotOn([SC.solo],fin?'#ffd88a':'#fff0d0');
+    if(v.agent&&spr(v)!=='agent'){await sleep(700);await unmask(a)}         // the agent's disguise never survives the dream
+    await dline((fin?U.finale:'')+txt);await apply(e);await tap();await sceneDown()}
   for(let a=0;a<NF-1;a++){const A=frames[a].t,B=frames[a+1].t;if(!A||!B)continue;
     const key=[A.v.id,B.v.id].sort().join('+');const cb=COMBOS[key];
-    if(cb){albFind('c',key);CONTRIB.push({who:A.v.name+' & '+B.v.name,e:{...cb.e}});await dline('✦ '+cb.t);await apply(cb.e);await tap()}}
+    if(cb){albFind('c',key);CONTRIB.push({who:A.v.name+' & '+B.v.name,e:{...cb.e}});
+      $('slab').innerHTML='✦';await sceneUp(frames[a+1].p?frames[a+1].p.id:'none');
+      const x1=actor(A.v.agent?'agent':spr(A.v),SC.duo[0]),x2=actor(B.v.agent?'agent':spr(B.v),SC.duo[1]);await sleep(250);x1.classList.add('in');await sleep(200);x2.classList.add('in');sfx.pick();await sleep(700);
+      await spotOn(SC.duo,'#f8c0dc');await dline('✦ '+cb.t);await apply(cb.e);await tap();await sceneDown()}}
   const broke=MK.filter(k=>S[k]<=0||S[k]>=100);
-  if(broke.length){shake(6,400);sfx.bad();await dline(U.cracked);await tap()}
-  else{await dline(U.slept);await tap()}
+  reelMark(-1);$('slab').textContent='';await sceneUp('none',true);
+  if(broke.length){await spotOn([SC.solo],'#e05a5a',true);shake(6,400);sfx.bad();await dline(U.cracked);await tap()}
+  else{await spotOn([SC.solo],'#a8b8ff',true);await dline(U.slept);await tap()}
   morning(broke);
 }
+/* ---------- the scene: a little room per place (back layer, the guest, a front layer that hides the bottom of the
+   bust, Mira seen from behind), then a light pass: darkness, coloured lamps of the room, the spotlight on the guest.
+   Places without a room yet fall back to the painted reel backdrop. ---------- */
+const SW=312,SH=152;
+// solo/duo: [centre x, top y] of a guest's 64x76 bust; mira: [x, y]; lights: x, y, radius, colour, strength
+const SCN={
+  home:{img:'dream_home',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.5,steam:[130,64],
+    lights:[{x:130,y:30,r:150,col:'#ffc070',k:.9},{x:30,y:24,r:95,col:'#6f80e0',k:.6},{x:240,y:134,r:46,col:'#ffd890',k:.5}]},
+  sky:{img:'dream_sky',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.42,lights:[{x:252,y:30,r:150,col:'#c8d0ff',k:.8},{x:150,y:118,r:140,col:'#ff9ab0',k:.5}]},
+  school:{img:'dream_school',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.5,lights:[{x:205,y:4,r:150,col:'#dff4ea',k:.85},{x:42,y:22,r:50,col:'#c8d8ff',k:.4}]},
+  studio:{img:'dream_studio',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.48,lights:[{x:143,y:62,r:120,col:'#ffc890',k:.8},{x:280,y:10,r:110,col:'#a0b4f0',k:.5}]},
+  sea:{img:'dream_sea',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.48,lights:[{x:150,y:26,r:160,col:'#b0c4ff',k:.85},{x:292,y:40,r:60,col:'#ffe0a0',k:.6}]},
+  attic:{img:'dream_attic',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.55,lights:[{x:230,y:30,r:130,col:'#ffc070',k:.9},{x:156,y:30,r:80,col:'#8090e0',k:.6}]},
+  fair:{img:'dream_fair',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.45,lights:[{x:132,y:58,r:100,col:'#ff88c8',k:.65},{x:200,y:16,r:130,col:'#ffd070',k:.6},{x:262,y:60,r:80,col:'#ff9060',k:.45}]},
+  train:{img:'dream_train',solo:[212,36],duo:[[198,36],[262,36]],mira:[14,40],amb:.5,steam:[297,80,4],lights:[{x:77,y:27,r:140,col:'#ffc880',k:.9},{x:200,y:58,r:110,col:'#6070d0',k:.5},{x:254,y:28,r:50,col:'#c8d4ff',k:.4}]},
+};
+const SC0={solo:[156,26],duo:[[104,26],[208,26]],cut:1,amb:.62,lights:[]};   // no room yet: guests float high, faces clear of the text
+let SC=SC0,steamT=0;
+const SIMG={};function simg(n){if(!SIMG[n]){SIMG[n]=new Image();SIMG[n].src=`../art/px/out/${n}.png`}return SIMG[n]}
+for(const k in SCN){simg(SCN[k].img);simg(SCN[k].img+'_fg')}
+const loaded=im=>im.complete?Promise.resolve():new Promise(r=>{im.onload=im.onerror=r});
+function sceneClear(){clearInterval(steamT);$('scene').querySelectorAll('.actor,.puff,.steam,.mote').forEach(n=>n.remove());
+  for(const id of ['slit','sglow'])$(id).getContext('2d').clearRect(0,0,DLW,DLH)}
+function reelMark(i){[...$('reelp').children].forEach((c,k)=>{c.className='ch'+(k===i?' on':k<i||i<0?' done':'')})}
+function actor(id,[cx,top]){const d=document.createElement('div');d.className='actor';d.style.left=(cx-32)+'px';
+  if(top!=null){d.style.top=top+'px';d.style.bottom='auto'}if(SC.cut)d.classList.add('cut')
+  d.innerHTML=`<img src="../art/px/out/v_${id}.png" width="64" height="76">`;$('scene').insertBefore(d,$('sfg'));return d}
+// lights fully down over the room (dark wash + its own lamps), then the black cover lifts
+async function sceneUp(pid,empty){sceneClear();SC=(!empty&&SCN[pid])||SC0;const c=$('sbg').getContext('2d');c.imageSmoothingEnabled=false;
+  c.clearRect(0,0,SW,SH);
+  if(empty){c.fillStyle='#0a0714';c.fillRect(0,0,SW,SH)}
+  else if(SC.img){const im=simg(SC.img);await loaded(im);c.drawImage(im,0,0)}
+  else c.drawImage(sceneBg(pid,SW/2,SH/2),0,0,SW,SH);
+  const fg=$('sfg'),mi=$('smira');
+  if(SC.img){const im=simg(SC.img+'_fg');await loaded(im);fg.src=im.src;fg.style.display='block'}else fg.style.display='none';
+  if(SC.mira){mi.style.left=SC.mira[0]+'px';mi.style.top=SC.mira[1]+'px';mi.style.display='block'}else mi.style.display='none';
+  if(SC.steam)steamT=setInterval(steam,170);
+  motes();drawLight([],null);$('scene').classList.add('on');await sleep(650)}
+async function sceneDown(){$('scene').classList.remove('on');$('dtext').textContent='';await sleep(620);sceneClear()}
+function steam(){const [sx,sy,sw=14]=SC.steam,p=document.createElement('div');p.className='steam';
+  p.style.left=(sx-sw+Math.random()*sw*2|0)+'px';p.style.top=sy+'px';$('scene').insertBefore(p,$('smira'));
+  const dx=(Math.random()-.5)*14|0;
+  p.animate([{transform:'translate(0,0)',opacity:0},{opacity:.7,offset:.2},{transform:`translate(${dx}px,-34px)`,opacity:0}],{duration:1500+Math.random()*700,easing:'steps(10)',fill:'forwards'}).onfinish=()=>p.remove()}
+// the light pass, computed at quarter resolution and scaled up smoothly: no dither on top of the pixel art.
+// Darkness is a deep dream violet, the room's lamps cut it and tint what they touch (glow canvas, screen-blended and
+// blurred = bloom), and a guest gets a soft halo instead of a stage spotlight.
+const hex3=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),DLW=78,DLH=38;
+function drawLight(spots,col){
+  const dc=$('slit').getContext('2d'),gc=$('sglow').getContext('2d'),D=dc.createImageData(DLW,DLH),G=gc.createImageData(DLW,DLH);
+  const L=SC.lights.map(l=>({...l,c:hex3(l.col)})),T=col?hex3(col):null,amb=SC.amb*.85;
+  for(let y=0;y<DLH;y++)for(let x=0;x<DLW;x++){const X=x*4+2,Y=y*4+2;
+    let lit=0,gr=0,gg=0,gb=0;
+    for(const l of L){const d=Math.hypot(X-l.x,Y-l.y)/l.r;if(d<1){const f=(1-d)*(1-d)*l.k;lit+=f;gr+=l.c[0]*f;gg+=l.c[1]*f;gb+=l.c[2]*f}}
+    if(T)for(const [sx,top] of spots){const hy=(top??76)+34,px=(X-sx)/46,py=(Y-hy)/54,r2=px*px+py*py;
+      if(r2<1){const h=(1-r2)*(1-r2)*.95;lit+=h;gr+=T[0]*h;gg+=T[1]*h;gb+=T[2]*h}}
+    const i=(y*DLW+x)*4,dk=amb*(1-Math.min(1,lit));
+    D.data[i]=22;D.data[i+1]=12;D.data[i+2]=44;D.data[i+3]=dk*255;
+    if(lit>0){G.data[i]=gr/lit;G.data[i+1]=gg/lit;G.data[i+2]=gb/lit;G.data[i+3]=Math.min(.5,lit*.36)*255}}
+  dc.putImageData(D,0,0);gc.putImageData(G,0,0)}
+// a few warm motes drifting slowly through the dream
+function motes(){for(let i=0;i<14;i++){const m=document.createElement('div');m.className='mote';
+  const x=20+Math.random()*272,y=10+Math.random()*120,dx=(Math.random()-.5)*30,dy=-10-Math.random()*25,d=5000+Math.random()*5000;
+  m.style.left=(x|0)+'px';m.style.top=(y|0)+'px';$('scene').appendChild(m);
+  m.animate([{transform:'translate(0,0)',opacity:0},{opacity:.9,offset:.3},{opacity:.6,offset:.7},{transform:`translate(${dx|0}px,${dy|0}px)`,opacity:0}],{duration:d,delay:-Math.random()*d,iterations:Infinity,easing:'ease-in-out'})}}
+async function spotOn(spots,col,flicker){sfx.spot();
+  if(flicker){for(let i=0;i<3;i++){drawLight(spots,col);await sleep(70);drawLight([],null);await sleep(90+i*40)}}
+  drawLight(spots,col);await sleep(250)}
+// the disguise slides off: a puff of dream dust, then the man in the suit
+async function unmask(a){sfx.poof();shake(3,250);a.classList.add('poof');
+  const cx=parseFloat(a.style.left)+32;
+  for(let i=0;i<22;i++){const p=document.createElement('div');p.className='puff';const an=Math.random()*6.283,r=10+Math.random()*26;
+    p.style.left=(cx-1)+'px';p.style.top=(a.offsetTop+40)+'px';$('scene').appendChild(p);
+    p.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${Math.cos(an)*r|0}px,${Math.sin(an)*r*.8|0}px)`,opacity:0}],{duration:600+Math.random()*300,easing:'steps(6)',fill:'forwards'})}
+  await sleep(220);a.querySelector('img').src='../art/px/out/v_agent.png';await sleep(500);a.classList.remove('poof')}
 function morning(broke){
   const N=WN(),W=WU(),g=NT.goal,ok=!broke.length&&g.test(S);
   let main=ok?N.ok:N.bad;if(!ok&&!broke.length&&N.high)main=S.past>65?N.high:N.low;
@@ -1352,6 +1469,7 @@ function morning(broke){
     if(broke.includes('love')&&S.love>=100)L.push(U.mLove100);
     if(!L.length)L.push(W.broke)}
   L.push(main);
+  if(frames.some(f=>f.t&&f.t.v.agent))L.push(U.mAgent);   // the agent got in: Grayline's idea is in her head now
   if(!broke.length){
     if(S.hope>=65&&NIGHT!==3)L.push(U.mHope);
     if(S.love>=65&&NIGHT!==2)L.push(U.mLove);
