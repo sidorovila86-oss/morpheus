@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desk sounds</title>
+<style>
+:root{--bg:#1b1a22;--card:#26252f;--ink:#ece6d6;--dim:#9a93a8;--acc:#e8c85a}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,sans-serif;padding:20px 16px}
+h1{font-size:20px;margin:0 0 4px}p{color:var(--dim);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.c{background:var(--card);border-radius:10px;padding:12px}
+.c h2{font-size:15px;margin:0 0 2px}.c small{color:var(--dim);display:block;margin-bottom:8px}
+button{background:#3a3846;color:var(--ink);border:0;border-radius:6px;padding:7px 10px;margin:0 6px 6px 0;cursor:pointer;font:inherit}
+button:hover{background:#4a4858}button.main{background:var(--acc);color:#1b1a22;font-weight:600}
+</style></head><body>
+<h1>Звуки стола</h1>
+<p>«Как в игре» — случайный вариант с тем же разбросом высоты, что в игре. Кнопки 1, 2, 3 — каждая запись отдельно. Нарезка и громкость берутся прямо из index.html.</p>
+<div class="grid" id="g"></div>
+<script>
+const RU={cup:['Кружка на стол','керамика о дерево'],candle:['Свеча на стол','латунное блюдце, играется выше'],lamp:['Лампа на стол','тяжёлое основание, играется ниже'],
+ folder:['Папка на стол',''],coin:['Монетка: передвинуть и отпустить','тихий стук'],land:['Монетка: падение после броска','удар и докручивается'],
+ flip:['Монетка: подброс',''],bell:['Звонок на стойке',''],page:['Страница досье',''],close:['Досье закрывается',''],sip:['Глоток кофе','клик по кружке'],
+ sw:['Выключатель лампы и свечи',''],stamp:['Штамп','сейчас в игре не используется'],paper:['Бумага: карточки, кадры, стикеры','берёшь и кладёшь']};
+const RATE={lamp:.8,candle:1.25};
+let AC,D,B={};
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function peak(b,o,d){let m=1e-4;for(let c=0;c<b.numberOfChannels;c++){const a=b.getChannelData(c);for(let i=o*b.sampleRate|0,e=Math.min(a.length,(o+d)*b.sampleRate|0);i<e;i++)m=Math.max(m,Math.abs(a[i]))}return m}
+function play(k,i,jit){const x=D[k].x[i],b=B[x[0]];if(!b)return;const [f,o,d]=x,r=(RATE[k]||1)*(jit?rnd(.95,1.05):1),len=d/r,G=D[k].v/peak(b,o,d)*.5,t=AC.currentTime,
+  s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;s.playbackRate.value=r;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(G,t+.003);
+  g.gain.setValueAtTime(G,t+Math.max(.004,len-.04));g.gain.linearRampToValueAtTime(0,t+len);s.connect(g).connect(AC.destination);s.start(t,o,d+.01);s.stop(t+len+.02)}
+(async()=>{
+  const src=await (await fetch('../index.html')).text();
+  const m=src.match(/const SMP_DEF=(\{[\s\S]*?\n\});/);D=new Function('return '+m[1].replace(/\/\/[^\n]*/g,''))();
+  const g=document.getElementById('g');
+  for(const k of Object.keys(D)){const [t,s]=RU[k]||[k,''];const c=document.createElement('div');c.className='c';
+    c.innerHTML=`<h2>${t}</h2><small>${s||'&nbsp;'}</small>`;const a=document.createElement('button');a.className='main';a.textContent='▶ Как в игре';
+    a.onclick=async()=>{await ensure();play(k,Math.floor(Math.random()*D[k].x.length),1)};c.append(a);
+    D[k].x.forEach((x,i)=>{const b=document.createElement('button');b.textContent=(i+1);b.title=x[0];b.onclick=async()=>{await ensure();play(k,i,0)};c.append(b)});g.append(c)}
+})();
+let loading=null;
+function ensure(){if(!AC)AC=new AudioContext();return loading=loading||Promise.all([...new Set(Object.values(D).flatMap(d=>d.x.map(x=>x[0])))]
+  .map(async f=>{B[f]=await AC.decodeAudioData(await (await fetch(f+'.mp3')).arrayBuffer())}))}
+</script></body></html>

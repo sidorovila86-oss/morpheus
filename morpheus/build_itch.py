@@ -19,6 +19,7 @@ for f in os.listdir(ART):
 
 shutil.copytree(os.path.join(SRC, 'fonts'), os.path.join(DIST, 'fonts'), ignore=shutil.ignore_patterns('*.py'))
 shutil.copytree(os.path.join(SRC, 'music'), os.path.join(DIST, 'music'), ignore=shutil.ignore_patterns('README.txt'))
+shutil.copytree(os.path.join(SRC, 'sfx'), os.path.join(DIST, 'sfx'), ignore=shutil.ignore_patterns('listen.html'))
 
 if os.path.exists(ZIP): os.remove(ZIP)
 n = 0

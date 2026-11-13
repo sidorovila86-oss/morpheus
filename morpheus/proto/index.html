@@ -523,7 +523,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let AC=null,master=null,noiseBuf=null;
-function initAudio(){if(AC)return;AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.5;master.connect(AC.destination);audioBuses();
+function initAudio(){if(AC)return;AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.5;master.connect(AC.destination);audioBuses();smpLoad();
   noiseBuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
 function tone(type,f1,f2,dur,peak,delay=0){if(!AC)return;const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();
   o.type=type;o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
@@ -531,14 +531,48 @@ function tone(type,f1,f2,dur,peak,delay=0){if(!AC)return;const t=AC.currentTime+
 function noise(dur,peak,ftype,f1,q=1,delay=0,f2=0){if(!AC)return;const t=AC.currentTime+delay,s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
   s.buffer=noiseBuf;f.type=ftype;f.frequency.setValueAtTime(f1,t);if(f2)f.frequency.exponentialRampToValueAtTime(f2,t+dur);f.Q.value=q;
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f).connect(g).connect(master);s.start(t,Math.random()*.5);s.stop(t+dur+.05)}
+/* ---------- recorded desk sounds (sfx/, Freesound CC0, see sfx/README.txt): [file, start s, length s] cut at play time.
+   Each variant is normalised to the sound's level; if a file fails to load the synthesised sound plays instead. ---------- */
+const SMP_DEF={
+  cup:  {v:.75,x:[['cup_404922',.30,.5],['cup_272022',.14,.45],['cup_460241',1.91,.5]]},    // ceramic mug on wood
+  candle:{v:.35,x:[['cup_460241',1.91,.4],['cup_272022',.14,.35]]},                           // brass dish, played higher
+  lamp: {v:.6,x:[['close_393842',1.30,.4]]},                                                  // heavy base, played lower
+  folder:{v:.6,x:[['close_393842',1.30,.4],['close_699322',.10,.18]]},
+  coin: {v:.35,x:[['coin_235481',.26,.5],['coin_470901',1.02,.35]]},                         // slid and set down
+  land: {v:.55,x:[['coin_470901',5.57,2.4],['coin_235481',.26,1.2]]},                        // falls on the desk and settles
+  flip: {v:.45,x:[['coin_391958',0,.6]]},
+  bell: {v:.7,x:[['bell_685111',.77,1.9],['bell_221515',.24,2.5]]},
+  page: {v:.45,x:[['page_755981',.25,.85],['page_466375',.29,.5],['page_615337',0,.8]]},
+  close:{v:.55,x:[['close_393842',1.30,.4],['close_699322',.10,.18]]},
+  sip:  {v:.6,x:[['sip_272037',0,1.6]]},
+  sw:   {v:.45,x:[['switch_788643',.07,.15]]},
+  stamp:{v:.8,x:[['stamp_470710',.46,.6]]},
+  paper:{v:.35,x:[['paper_551314',1.18,.3],['paper_551314',1.57,.3],['paper_551314',1.88,.28],['paper_551314',2.15,.25]]},
+};
+const SMP_RAW={},SMP={},smpLast={};
+[...new Set(Object.values(SMP_DEF).flatMap(d=>d.x.map(x=>x[0])))].forEach(f=>{SMP_RAW[f]=fetch('sfx/'+f+'.mp3').then(r=>r.ok?r.arrayBuffer():null).catch(()=>null)});
+function smpLoad(){for(const [f,pr] of Object.entries(SMP_RAW))pr.then(ab=>ab&&AC.decodeAudioData(ab)).then(b=>{if(b)SMP[f]=b}).catch(()=>{})}
+function smpPeak(b,o,d){let m=1e-4;for(let c=0;c<b.numberOfChannels;c++){const a=b.getChannelData(c),i0=Math.floor(o*b.sampleRate),i1=Math.min(a.length,Math.floor((o+d)*b.sampleRate));for(let i=i0;i<i1;i++){const v=Math.abs(a[i]);if(v>m)m=v}}return m}
+function smp(name,{v=1,rate=1,delay=0}={}){if(!AC)return false;const D=SMP_DEF[name];if(!D)return false;
+  const ok=D.x.map((x,i)=>i).filter(i=>SMP[D.x[i][0]]);if(!ok.length)return false;
+  let k=ok[Math.floor(Math.random()*ok.length)];if(ok.length>1&&k===smpLast[name])k=ok[(ok.indexOf(k)+1)%ok.length];smpLast[name]=k;
+  const [f,o,d]=D.x[k],b=SMP[f],x=D.x[k];x.pk=x.pk||smpPeak(b,o,d);
+  const t=AC.currentTime+delay,src=AC.createBufferSource(),g=AC.createGain(),r=rate*rnd(.95,1.05),len=d/r,G=D.v*v/x.pk;
+  src.buffer=b;src.playbackRate.value=r;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(G,t+.003);
+  g.gain.setValueAtTime(G,t+Math.max(.004,len-.04));g.gain.linearRampToValueAtTime(0,t+len);
+  src.connect(g).connect(master);src.start(t,o,d+.01);src.stop(t+len+.02);return true}
+const PAPERY=new Set(['pad','note','ticket','card']);
 const sfx={
   hover(){const r=rnd(.9,1.15);tone('sine',1100*r,900*r,.045,.04);noise(.02,.025,'highpass',5000)},
-  pick(){const r=rnd(.85,1.2);noise(.08,.26,'bandpass',3400*r,.8,0,1400*r);tone('sine',520*r,240*r,.07,.06)},
-  drop(){const r=rnd(.9,1.1);noise(.06,.18,'lowpass',1000*r);tone('sine',170*r,90,.09,.14)},
-  stamp(){tone('sine',120,40,.28,.7);noise(.14,.5,'lowpass',1400,1,0,180);tone('square',2400,700,.02,.05)},
+  pick(it){if(it&&PAPERY.has(it.o.snd)){smp('paper',{v:.6});return}if(it){noise(.05,.05,'bandpass',2200,.8);return}const r=rnd(.85,1.2);noise(.08,.26,'bandpass',3400*r,.8,0,1400*r);tone('sine',520*r,240*r,.07,.06)},
+  drop(it){const k=it?.o.snd;
+    if(k==='lamp'&&smp('lamp',{rate:.8}))return;if(k==='candle'&&smp('candle',{rate:1.25}))return;
+    if(k==='bell'&&smp('close',{v:.5,rate:1.2})){smp('bell',{v:.12});return}
+    if(PAPERY.has(k)&&smp('paper'))return;if(k&&smp(k))return;const r=rnd(.9,1.1);noise(.06,.18,'lowpass',1000*r);tone('sine',170*r,90,.09,.14)},
+  stamp(){if(smp('stamp'))return;tone('sine',120,40,.28,.7);noise(.14,.5,'lowpass',1400,1,0,180);tone('square',2400,700,.02,.05)},
   blip(p){tone('square',p*rnd(.97,1.06),0,.028,.02)},
-  page(){noise(.22,.16,'bandpass',1600,.7,0,4200)},
-  sip(){noise(.4,.12,'lowpass',1100,2,0,250);tone('sine',300,180,.15,.03,.25)},
+  page(){if(smp('page'))return;noise(.22,.16,'bandpass',1600,.7,0,4200)},
+  sip(){if(smp('sip'))return;noise(.4,.12,'lowpass',1100,2,0,250);tone('sine',300,180,.15,.03,.25)},
   door(){[523,659,784,1046].forEach((f,i)=>tone('sine',f,0,.7,.05,i*.08));noise(.5,.06,'bandpass',900,1,0,2400)},
   away(){noise(.25,.1,'bandpass',500,.8,0,1600)},
   dream(){[262,330,392,494,587].forEach((f,i)=>{tone('sine',f,0,2.2,.05,i*.18);tone('triangle',f*2,0,1.2,.015,i*.18)})},
@@ -549,12 +583,14 @@ const sfx={
   bad(){tone('square',247,196,.16,.06);tone('square',185,147,.3,.06,.14)},
   click(){tone('square',1800,900,.02,.05);noise(.03,.12,'highpass',3000)},
   scrape(v=1){noise(.05,.05*v+.02,'bandpass',2800*rnd(.9,1.1),2);tone('sine',3300*rnd(.97,1.03),0,.05,.012*v+.004)},
-  flip(){tone('sine',3400,0,.35,.05);tone('sine',5100,0,.2,.025);for(let i=1;i<8;i++)tone('triangle',5400,0,.012,.008*(1-i/9),i*.11)},
-  land(){[2750,3500,2950].forEach((f,i)=>tone('sine',f*rnd(.97,1.03),0,.22-i*.05,.05-i*.012,i*.07));noise(.03,.1,'highpass',3500)},
+  flip(){if(smp('flip'))return;tone('sine',3400,0,.35,.05);tone('sine',5100,0,.2,.025);for(let i=1;i<8;i++)tone('triangle',5400,0,.012,.008*(1-i/9),i*.11)},
+  land(){if(smp('land'))return;[2750,3500,2950].forEach((f,i)=>tone('sine',f*rnd(.97,1.03),0,.22-i*.05,.05-i*.012,i*.07));noise(.03,.1,'highpass',3500)},
   slide(){noise(.05,.2,'bandpass',2600,1.2);tone('square',900,600,.03,.03,.03)},
-  bell(){[2093,2637].forEach((f,i)=>tone('sine',f,0,1.1,.09,i*.002));tone('triangle',4186,0,.4,.02)},
+  bell(){if(smp('bell'))return;[2093,2637].forEach((f,i)=>tone('sine',f,0,1.1,.09,i*.002));tone('triangle',4186,0,.4,.02)},
   stick(){noise(.04,.12,'lowpass',700);tone('sine',260,140,.05,.05)},
   boost(m){[660,880,1320].forEach((f,i)=>tone('triangle',f*(m||1)**.3,0,.12,.035,i*.06))},
+  sw(){if(smp('sw'))return;this.click()},
+  close(){if(smp('close'))return;this.drop()},
   twitch(){tone('triangle',rnd(1400,1800),0,.02,.012)},
 };
 
@@ -655,9 +691,9 @@ class Item{
   }
 }
 addEventListener('pointermove',e=>{const m=toStage(e.clientX,e.clientY);mouse.x=m.x;mouse.y=m.y;
-  if(down&&!down.moved&&Math.hypot(m.x-down.sx,m.y-down.sy)>3&&down.it.o.drag!==false){down.moved=true;down.it.drag=true;down.it.el.classList.add('dragging');sfx.pick()}});
+  if(down&&!down.moved&&Math.hypot(m.x-down.sx,m.y-down.sy)>3&&down.it.o.drag!==false){down.moved=true;down.it.drag=true;down.it.el.classList.add('dragging');sfx.pick(down.it)}});
 addEventListener('pointerup',()=>{if(!down)return;const it=down.it;
-  if(down.moved){it.drag=false;it.el.classList.remove('dragging');sfx.drop();it.vs-=.05;it.o.onDrop?.(it)}else it.o.onClick?.(it);down=null});
+  if(down.moved){it.drag=false;it.el.classList.remove('dragging');sfx.drop(it);it.vs-=.05;it.o.onDrop?.(it)}else it.o.onClick?.(it);down=null});
 
 /* =========================================================
    PSYCHE-O-METER: 4 analog gauges drawn pixel by pixel
@@ -707,8 +743,8 @@ document.querySelectorAll('.ic').forEach(el=>{const k=el.dataset.ic;const cv=doc
    DESK SETUP
    ========================================================= */
 const TK_DESK=.88,LAMP_SC=.84;   // desk scale of ID cards and the lamp (less clutter)
-const folder=new Item('folder',{tiltK:.6,x:2,y:204,w:120,h:156,scaleT:()=>.86,onClick:()=>openBook()});
-const mug   =new Item('mug',{x:62,y:128,w:60,h:65,tiltK:.5,scaleT:()=>.78,compose:c=>{clearSteam(c);cosTint(c,60,65,'mug')},onClick:()=>{sfx.sip();skip=true;think(U.coffee)}});
+const folder=new Item('folder',{snd:'folder',tiltK:.6,x:2,y:204,w:120,h:156,scaleT:()=>.86,onClick:()=>openBook()});
+const mug   =new Item('mug',{snd:'cup',x:62,y:128,w:60,h:65,tiltK:.5,scaleT:()=>.78,compose:c=>{clearSteam(c);cosTint(c,60,65,'mug')},onClick:()=>{sfx.sip();skip=true;think(U.coffee)}});
 /* desk lights: the candle plus every lamp bought in the shop; any number of them can stand on the desk at once.
    Each has its own switch (bright / dim / off) and remembers where it was put ('morpheus.lights'). */
 let LPOS={};try{LPOS=JSON.parse(localStorage.getItem('morpheus.lights')||'{}')||{}}catch(e){}
@@ -717,16 +753,16 @@ const LIGHTS={};
 function makeLamp(id,i){const el=document.createElement('div');el.className='item';el.id='lamp_'+id;
   el.innerHTML=`<img src="../art/px/out/lamp.png" width="104" height="78" alt="">`;$('lamp').before(el);
   const [x,y]=LPOS[id]||[150+i*44,120];
-  const it=new Item(el,{x,y,w:104,h:78,tiltK:.5,scaleT:()=>LAMP_SC,minY:0,noGlass:true,baseY:124,
+  const it=new Item(el,{snd:'lamp',x,y,w:104,h:78,tiltK:.5,scaleT:()=>LAMP_SC,minY:0,noGlass:true,baseY:124,
     compose:(c,me)=>{cosTint(c,104,78,'lamp',id);if(me.st===2){c.fillStyle='#3a3424';c.fillRect(16,35,72,2)}},
-    onClick:()=>{it.st=(it.st+1)%3;it.rebuild();sfx.click();relight()},onDrop:()=>{saveLights();relight()}});
+    onClick:()=>{it.st=(it.st+1)%3;it.rebuild();sfx.sw();relight()},onDrop:()=>{saveLights();relight()}});
   it.st=0;it.lid=id;LIGHTS[id]=it;return it}
 Object.keys(COS.lamp).filter(id=>id!=='candle').forEach(makeLamp);
 $('lamp').remove();
 const lamp=LIGHTS.green;
 const gauge =new Item('gauge',{x:290,y:127,w:78,h:68,tilt:false});meterLabels(gauge.el);meterLabels($('g2wrap'));
-const pad   =new Item('pad',{tiltK:.6,x:14,y:130,w:42,h:44,scaleT:()=>.9,onClick:()=>newNote()});
-const bell  =new Item('bell',{tiltK:.6,x:22,y:176,w:26,h:20,onClick:()=>ringBell()});
+const pad   =new Item('pad',{snd:'pad',tiltK:.6,x:14,y:130,w:42,h:44,scaleT:()=>.9,onClick:()=>newNote()});
+const bell  =new Item('bell',{snd:'bell',tiltK:.6,x:22,y:176,w:26,h:20,onClick:()=>ringBell()});
 /* the free starting light: a candle (lamps are bought in Morpheus' shop) */
 let candleFl=1;
 function drawCandle(c,it){const R=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
@@ -740,8 +776,8 @@ function makeCandle(id,pos){const el=document.createElement('div');el.className=
   const b=document.createElement('canvas');b.width=16;b.height=30;el.innerHTML=`<img width="16" height="30" alt="" src="${b.toDataURL()}">`;
   $('folder').after(el);
   const [x,y]=LPOS[id]||pos;
-  const it=new Item(el,{x,y,w:16,h:30,tiltK:.4,minY:0,noGlass:true,baseY:122,compose:drawCandle,
-    onClick:()=>{it.st=it.st===2?0:2;it.rebuild();sfx.click();relight()},onDrop:()=>{saveLights();relight()}});
+  const it=new Item(el,{snd:'candle',x,y,w:16,h:30,tiltK:.4,minY:0,noGlass:true,baseY:122,compose:drawCandle,
+    onClick:()=>{it.st=it.st===2?0:2;it.rebuild();sfx.sw();relight()},onDrop:()=>{saveLights();relight()}});
   it.st=0;it.lid=id;it.isC=true;it.fl=1;LIGHTS[id]=it;return it}
 const candle=makeCandle('candle',[226,150]),candle2=makeCandle('candle2',[262,150]);
 const CANDLES=[candle,candle2];
@@ -764,7 +800,7 @@ function drawCoin(c,it){const s=it.sq??1,ry=Math.max(.7,5.5*s),cy=7.5-(1-s)*1.5,
 const coin=(()=>{const el=document.createElement('div');el.className='item';el.id='coin';
   const b=document.createElement('canvas');b.width=CW;b.height=CH;el.innerHTML=`<img width="${CW}" height="${CH}" alt="" src="${b.toDataURL()}">`;
   $('folder').after(el);
-  const it=new Item(el,{x:190,y:170,w:CW,h:CH,tiltK:.5,minY:124,compose:drawCoin,locked:()=>it.fly!=null,onClick:()=>coinToss(it),
+  const it=new Item(el,{snd:'coin',x:190,y:170,w:CW,h:CH,tiltK:.5,minY:124,compose:drawCoin,locked:()=>it.fly!=null,onClick:()=>coinToss(it),
     onDrop:()=>{if(performance.now()-coinStill>140)coinToss(it)}});   // let go while standing still = toss
   it.face=0;it.sq=1;it.fly=null;return it})();
 let coinT=0,coinM=null,coinStill=0;
@@ -920,7 +956,7 @@ function makePlace(id,m,slot){
   const el=document.createElement('div');el.className='item';el.style.zIndex=++zTop;
   el.innerHTML=`<img src="../art/px/out/place_${id}.png" width="30" height="24" alt="">`;
   stage.insertBefore(el,$('shade'));
-  const it=new Item(el,{x:SLOTS[slot][0],y:SLOTS[slot][1],w:30,h:24,scaleT:q=>q.f!=null&&!q.drag?LAY.ps:1,locked:()=>dreaming||spinning,compose:c=>{if(m>1)drawBadge(c,m)},
+  const it=new Item(el,{snd:'card',x:SLOTS[slot][0],y:SLOTS[slot][1],w:30,h:24,scaleT:q=>q.f!=null&&!q.drag?LAY.ps:1,locked:()=>dreaming||spinning,compose:c=>{if(m>1)drawBadge(c,m)},
     onEnter:()=>{if(lastHint!==it){lastHint=it;think(PLACES[id].name+(m>1?' ×'+m:'')+'. '+PLACES[id].desc+(m>1?' '+U.multHint(m):''),true)}},
     onLeave:()=>{if(lastHint===it){lastHint=null;thinkRelease()}},onDrop:dropPlace});
   it.id=id;it.m=m;it.f=null;it.slot=slot;hand[slot]=it;places.push(it);it.vl+=2;it.vr+=6;return it}
@@ -1075,7 +1111,7 @@ function makeNote(x,y,c,{html,text},goal){
   el.innerHTML=`<img src="../art/px/out/note_${c}.png" width="36" height="36" alt=""><div class="note-t" spellcheck="false"></div>`;
   stage.insertBefore(el,$('thought'));el.style.zIndex=700;
   const tx=el.querySelector('.note-t');if(html)tx.innerHTML=html;else tx.textContent=text||'';
-  const n=new Item(el,{x,y,w:36,h:36,minY:0,zBase:700,locked:()=>n.editing,onDrop:()=>dropNote(n)});
+  const n=new Item(el,{snd:'note',x,y,w:36,h:36,minY:0,zBase:700,locked:()=>n.editing,onDrop:()=>dropNote(n)});
   n.c=c;n.txt=tx;n.goal=goal;n.editing=false;
   el.addEventListener('dblclick',()=>editNote(n));
   el.addEventListener('contextmenu',e=>{e.preventDefault();if(n.goal||n.editing||n.dead)return;n.dead=true;el.remove();sfx.away();saveNotes()});   // right click: tear it off
@@ -1299,7 +1335,7 @@ function spawnTicket(v){
   el.innerHTML=`<img src="${blank.toDataURL()}" width="${TW}" height="${TH}"><div class="tk-name">${v.name}</div>`;
   stage.insertBefore(el,$('shade'));
   const img=new Image();img.src=`../art/px/out/v_${spr(v)}.png`;img.onload=()=>tk.rebuild();
-  const tk=new Item(el,{x:200,y:100,w:TW,h:TH,scaleT:q=>q.f!=null&&!q.drag?LAY.ts:TK_DESK,compose:c=>drawPhoto(c,v,img.complete&&img.naturalWidth?img:null),locked:()=>dreaming||(tk===ticket&&busy),
+  const tk=new Item(el,{snd:'ticket',x:200,y:100,w:TW,h:TH,scaleT:q=>q.f!=null&&!q.drag?LAY.ts:TK_DESK,compose:c=>drawPhoto(c,v,img.complete&&img.naturalWidth?img:null),locked:()=>dreaming||(tk===ticket&&busy),
     onEnter:()=>preview(Object.keys(tkEff(tk))),onLeave:()=>preview(null),onDrop:dropTicket});
   tk.v=v;tk.f=null;ticket=tk;
   tk.tx=tk.hx=140;tk.ty=tk.hy=140;sfx.pick();
@@ -1356,7 +1392,7 @@ function renderBook(){$('bk').innerHTML=pageHTML(spread*2,'l')+pageHTML(spread*2
 function fixIcons(){$('bk').querySelectorAll('.ic').forEach(el=>{if(el.firstChild)return;const k=el.dataset.ic;const cv=document.createElement('canvas');cv.width=7;cv.height=7;
   const c=cv.getContext('2d');ICON[k].forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch==='#'){c.fillStyle=MCOL[k];c.fillRect(x,y,1,1)}}));el.appendChild(cv)})}
 function openBook(){if($('dreamov').classList.contains('on'))return;$('book').classList.add('on');sfx.page();renderBook()}
-function closeBook(){$('book').classList.remove('on');sfx.drop()}
+function closeBook(){$('book').classList.remove('on');sfx.close()}
 let turning=false;
 async function turn(dir){
   if(turning)return;const to=spread+dir;if(to<0||to>=NSP)return;turning=true;sfx.page();
