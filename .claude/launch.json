@@ -1,0 +1,3 @@
+{ "version": "0.0.1", "configurations": [
+  { "name": "morpheus", "runtimeExecutable": "powershell", "runtimeArgs": ["-NoProfile","-ExecutionPolicy","Bypass","-File","D:/mygame/dream-within-a-dream/serve.ps1","-Port","8768"], "port": 8768 }
+] }

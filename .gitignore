@@ -1,0 +1,13 @@
+# Сборки — пересоздаются командой: python morpheus/build_itch.py
+morpheus/dist/
+morpheus/morpheus-itch.zip
+
+# Мусор
+*.bak
+*.bak.*
+__pycache__/
+*.pyc
+Thumbs.db
+desktop.ini
+.DS_Store
+.claude/settings.local.json
