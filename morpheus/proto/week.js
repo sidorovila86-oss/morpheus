@@ -90,7 +90,7 @@ en: {
     hurt: s => `What hurt most: ${s}.`,
     at: (who, where) => `${who} in ${where}`,
     broke: 'The dream broke in the middle of the night.',
-    nextNight: 'Next night ▶', replay: 'Replay the night', finish: 'The weekend ▶',
+    nextNight: 'Next night ▶', replay: 'Replay (once a week)', finish: 'The weekend ▶',
     weekTitle: "MIRA'S WEEK",
     endings: [
       "Mira's week ended the way it began: the same desk, the same grey blazer. Maybe next week. — MEMO: Report to my office, clerk.",
@@ -191,7 +191,7 @@ ru: {
     hurt: s => `Больше всего навредило: ${s}.`,
     at: (who, where) => `${who} + ${where}`,
     broke: 'Сон треснул посреди ночи.',
-    nextNight: 'Следующая ночь ▶', replay: 'Переиграть ночь', finish: 'Выходные ▶',
+    nextNight: 'Следующая ночь ▶', replay: 'Переиграть (1 раз)', finish: 'Выходные ▶',
     weekTitle: 'НЕДЕЛЯ МИРЫ',
     endings: [
       'Неделя Миры закончилась так же, как началась: тот же стол, тот же серый пиджак. Может быть, на следующей. — ЗАПИСКА: Зайдите ко мне, клерк.',
@@ -292,7 +292,7 @@ ja: {
     hurt: s => `いちばん悪かったもの：${s}。`,
     at: (who, where) => `${who}＋${where}`,
     broke: '夢は夜中にこわれた。',
-    nextNight: '次の夜 ▶', replay: 'この夜をやり直す', finish: '週末へ ▶',
+    nextNight: '次の夜 ▶', replay: 'やり直す（週1回）', finish: '週末へ ▶',
     weekTitle: 'ミラの一週間',
     endings: [
       'ミラの一週間は、始まったときと同じように終わった。同じ机、同じ灰色のジャケット。来週こそは。— 通達：係員、私の部屋に来なさい。',

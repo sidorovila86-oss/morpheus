@@ -1,6 +1,6 @@
 # Builds pixfix-400.ttf / pixfix-600.ttf: replacement glyphs for the
 # Pixelify Sans characters that read badly (2 5 7, Ш Щ Д К в д ш щ; О П are missing from Pixelify entirely;
-# lowercase е ё ъ ы ь э ю looked like capitals; capital Е Ё looked like a mirrored Э).
+# lowercase е ё ъ ы ь э ю looked like capitals; capital Е Ё looked like a mirrored Э; capital С had a G-like spur, capital Т looked like an arrow).
 # Same pixel grid as Pixelify: 1 module = 0.09386 em, cap height = 7 modules.
 # Used via @font-face unicode-range in front of Pixelify Sans.
 import os
@@ -142,6 +142,20 @@ G = {  # char: (rows top->bottom, top row index, advance400, advance600)
         '#....',
         '#....',
         '#####'], 0, 586, 597),
+ 'С': (['.####',
+        '#....',
+        '#....',
+        '#....',
+        '#....',
+        '#....',
+        '.####'], 0, 586, 597),
+ 'Т': (['#####',
+        '..#..',
+        '..#..',
+        '..#..',
+        '..#..',
+        '..#..',
+        '..#..'], 0, 586, 597),
  'Ё': (['.#.#.',
         '.....',
         '#####',

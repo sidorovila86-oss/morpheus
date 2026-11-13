@@ -99,3 +99,4 @@ function menuInit() {
   document.addEventListener('fullscreenchange', () => { if (S.classList.contains('on')) setRender() });
   menuLabels();
 }
+

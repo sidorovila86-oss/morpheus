@@ -6,8 +6,8 @@
 <title>Morpheus at the Desk — Night 1</title>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=DotGothic16&display=swap" rel="stylesheet">
 <style>
-@font-face{font-family:'PixFix';src:url(fonts/pixfix-400.ttf?v=7);font-weight:400;unicode-range:U+32,U+35,U+37,U+414,U+41A,U+41E-41F,U+428-429,U+432,U+434,U+435,U+448-449,U+44A-44E,U+451,U+401,U+415}
-@font-face{font-family:'PixFix';src:url(fonts/pixfix-600.ttf?v=7);font-weight:600 900;unicode-range:U+32,U+35,U+37,U+414,U+41A,U+41E-41F,U+428-429,U+432,U+434,U+435,U+448-449,U+44A-44E,U+451,U+401,U+415}
+@font-face{font-family:'PixFix';src:url(fonts/pixfix-400.ttf?v=9);font-weight:400;unicode-range:U+32,U+35,U+37,U+414,U+41A,U+41E-41F,U+428-429,U+432,U+434,U+435,U+448-449,U+44A-44E,U+451,U+401,U+415,U+421,U+422}
+@font-face{font-family:'PixFix';src:url(fonts/pixfix-600.ttf?v=9);font-weight:600 900;unicode-range:U+32,U+35,U+37,U+414,U+41A,U+41E-41F,U+428-429,U+432,U+434,U+435,U+448-449,U+44A-44E,U+451,U+401,U+415,U+421,U+422}
 :root{--font:'PixFix','Pixelify Sans',monospace;--ink:#26222b;--paper:#d8e2d6;--paper2:#c7dcd0;--line:#b2ba90;--dream:#c7b3e6;--red:#a04a3e;--green:#4f8a5e}
 html,body{margin:0;height:100%;background:#141016;overflow:hidden}
 #stage{position:absolute;left:0;top:0;width:480px;height:270px;transform-origin:0 0;overflow:hidden;overflow:clip;
@@ -303,6 +303,7 @@ const MCOL={fear:'#a07ad6',past:'#6fa0c8',hope:'#e8c85a',love:'#e0708a'};
 let SAVE=null;try{SAVE=JSON.parse(localStorage.getItem('morpheus.week')||'null')}catch(e){}
 const NIGHT=SAVE&&SAVE.night>=1&&SAVE.night<=5?SAVE.night:1;
 const RESULTS=SAVE&&Array.isArray(SAVE.results)?SAVE.results.slice(0,NIGHT-1):[];
+const REPLAYED=!!(SAVE&&SAVE.replayed);   // one replay of a night per week
 const NIGHTS=[
  {film:3,queue:['sheep','mom','shonen','dminus','agent','biscuit','giveaway','kevin','comet'],
   goal:{test:S=>S.fear<50,k:'fear',dir:-1}},                                              // Mon: presentation -> calm
@@ -529,6 +530,9 @@ const sfx={
   good(){[784,988,1318].forEach((f,i)=>tone('square',f,0,.16,.04,i*.09))},
   bad(){tone('square',247,196,.16,.06);tone('square',185,147,.3,.06,.14)},
   click(){tone('square',1800,900,.02,.05);noise(.03,.12,'highpass',3000)},
+  scrape(v=1){noise(.05,.05*v+.02,'bandpass',2800*rnd(.9,1.1),2);tone('sine',3300*rnd(.97,1.03),0,.05,.012*v+.004)},
+  flip(){tone('sine',3400,0,.35,.05);tone('sine',5100,0,.2,.025);for(let i=1;i<8;i++)tone('triangle',5400,0,.012,.008*(1-i/9),i*.11)},
+  land(){[2750,3500,2950].forEach((f,i)=>tone('sine',f*rnd(.97,1.03),0,.22-i*.05,.05-i*.012,i*.07));noise(.03,.1,'highpass',3500)},
   slide(){noise(.05,.2,'bandpass',2600,1.2);tone('square',900,600,.03,.03,.03)},
   bell(){[2093,2637].forEach((f,i)=>tone('sine',f,0,1.1,.09,i*.002));tone('triangle',4186,0,.4,.02)},
   stick(){noise(.04,.12,'lowpass',700);tone('sine',260,140,.05,.05)},
@@ -616,7 +620,7 @@ class Item{
     this.vx=(this.vx+(this.tx-this.x)*.2)*.7;this.vy=(this.vy+(this.ty-this.y)*.2)*.7;this.x+=this.vx;this.y+=this.vy;
     // lift = how high the item floats above the desk (springy, whole pixels only)
     const tl=this.forceS!=null?-1:this.drag?4:this.hover?2:0;
-    this.vl=(this.vl+(tl-this.lift)*.25)*.6;this.lift+=this.vl;
+    this.vl=(this.vl+(tl-this.lift)*.25)*.6;this.lift+=this.vl;if(this.fly!=null){this.lift=this.fly;this.vl=0}
     // Balatro-style tilt: lean with the drag, tip towards the cursor on hover
     let tr=0,tax=0,tay=0;const k=this.o.tiltK??1;
     if(this.drag){tr=clamp(this.vx*1.8,-14,14);tax=clamp(this.vy*.03,-.18,.18);tay=clamp(-this.vx*.03,-.18,.18)}
@@ -714,17 +718,55 @@ function drawCandle(c,it){const R=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y
   R(7,9,1,3,'#2a2420');                                                           // wick
   if(it?.st!==2){const f=Math.floor(performance.now()/110)%3,sw=[0,1,-1][f];  // flame
     R(6+sw,3,3,7,'#e08a3a');R(7+sw,1,1,2,'#f0b050');R(6,6,3,4,'#f6c860');R(7,6,1,3,'#fff6d8')}}
-const candle=(()=>{const el=document.createElement('div');el.className='item';el.id='candle';
+function makeCandle(id,pos){const el=document.createElement('div');el.className='item';el.id=id;
   const b=document.createElement('canvas');b.width=16;b.height=30;el.innerHTML=`<img width="16" height="30" alt="" src="${b.toDataURL()}">`;
   $('folder').after(el);
-  const [x,y]=LPOS.candle||[232,150];
+  const [x,y]=LPOS[id]||pos;
   const it=new Item(el,{x,y,w:16,h:30,tiltK:.4,minY:0,noGlass:true,baseY:122,compose:drawCandle,
     onClick:()=>{it.st=it.st===2?0:2;it.rebuild();sfx.click();relight()},onDrop:()=>{saveLights();relight()}});
-  it.st=0;it.lid='candle';return it})();
-LIGHTS.candle=candle;
-const onDesk=()=>deskLights().map(id=>LIGHTS[id]).filter(Boolean);
-function lightsShow(){const on=new Set(deskLights());for(const [id,it] of Object.entries(LIGHTS))it.el.style.display=on.has(id)?'':'none'}
-setInterval(()=>{if(onDesk().includes(candle)&&candle.st!==2&&!dreaming){candle.rebuild();candleFl=.86+Math.random()*.16;relight()}},120);
+  it.st=0;it.lid=id;it.isC=true;it.fl=1;LIGHTS[id]=it;return it}
+const candle=makeCandle('candle',[226,150]),candle2=makeCandle('candle2',[262,150]);
+const CANDLES=[candle,candle2];
+// the shop's "candle" is the pair
+const deskIds=()=>deskLights().flatMap(id=>id==='candle'?['candle','candle2']:[id]);
+/* ---------- a coin: nudge it around with the mouse, click it while it lies still to toss it ---------- */
+const CW=17,CH=15,COIN=['#313638','#4a3818','#7a5c28','#a8843c','#ccaa58','#ead07a','#fff0b0'];
+const COIN_E=[['..###..','.##....','.##..#.','.##....','..###..'],     // heads: the moon
+              ['...#...','..##...','...#...','...#...','..###..']];    // tails: a one
+function drawCoin(c,it){const s=it.sq??1,ry=Math.max(.7,5.5*s),cy=7.5-(1-s)*1.5,th=s>.25?2:1,g=[];
+  for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const nx=(x+.5-8.5)/8,ny=(y+.5-cy)/ry,ns=(y+.5-cy-th)/ry;let k=-1;
+    if(nx*nx+ny*ny<=1){const r2=nx*nx+ny*ny,l=.5-.32*(nx+ny);
+      k=r2>.6?(l>.62?6:l>.4?5:4):(l>.6?5:4);
+      if(s>.45){const ex=x-5,ey=Math.floor((ny+.62)/1.24*5);
+        if(ey>=0&&ey<5&&ex>=0&&ex<7&&COIN_E[it.face||0][ey][ex]==='#'&&r2<.6)k=2}}
+    else if(nx*nx+ns*ns<=1)k=x%2?2:3;                               // the reeded edge
+    g[y*CW+x]=k}
+  for(let y=0;y<CH;y++)for(let x=0;x<CW;x++)if(g[y*CW+x]<0&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const X=x+dx,Y=y+dy;return X>=0&&Y>=0&&X<CW&&Y<CH&&g[Y*CW+X]>0}))g[y*CW+x]=0;
+  for(let i=0;i<g.length;i++)if(g[i]>=0){c.fillStyle=COIN[g[i]];c.fillRect(i%CW,i/CW|0,1,1)}}
+const coin=(()=>{const el=document.createElement('div');el.className='item';el.id='coin';
+  const b=document.createElement('canvas');b.width=CW;b.height=CH;el.innerHTML=`<img width="${CW}" height="${CH}" alt="" src="${b.toDataURL()}">`;
+  $('folder').after(el);
+  const it=new Item(el,{x:190,y:170,w:CW,h:CH,tiltK:.5,minY:124,compose:drawCoin,locked:()=>it.fly!=null,onClick:()=>coinToss(it),
+    onDrop:()=>{if(performance.now()-coinStill>140)coinToss(it)}});   // let go while standing still = toss
+  it.face=0;it.sq=1;it.fly=null;return it})();
+let coinT=0,coinM=null,coinStill=0;
+// held with the left button the coin slides along the desk; stop, let go, and it is tossed
+addEventListener('pointermove',e=>{const m=toStage(e.clientX,e.clientY),q=coinM;coinM=m;
+  if(!q||!coin.drag)return;const sp=Math.hypot(m.x-q.x,m.y-q.y);if(sp>.6)coinStill=performance.now();
+  if(sp>1.5&&performance.now()-coinT>130){coinT=performance.now();sfx.scrape(Math.min(1,sp/8))}});
+async function coinToss(it){if(it.fly!=null||dreaming)return;it.tx=it.x;it.ty=it.y;it.vx=it.vy=0;
+  const res=Math.random()<.5?0:1,start=it.face,n=8+(res!==start?1:0),t0=performance.now(),D=950;
+  sfx.flip();it.fly=0;
+  await new Promise(r=>{(function f(){const t=Math.min(1,(performance.now()-t0)/D),a=t*n*Math.PI;
+    it.fly=Math.round(52*4*t*(1-t));it.sq=Math.abs(Math.cos(a));it.face=(start+Math.floor(a/Math.PI+.5))%2;it.rebuild();
+    if(t<1)requestAnimationFrame(f);else r()})()});
+  it.fly=null;it.face=res;it.sq=1;it.rebuild();it.vl=-2.4;it.vr+=rnd(-8,8);sfx.land();
+  for(const q of [.75,1,.9,1]){await sleep(55);it.sq=q;it.rebuild()}}
+const onDesk=()=>deskIds().map(id=>LIGHTS[id]).filter(Boolean);
+function lightsShow(){const on=new Set(deskIds());for(const [id,it] of Object.entries(LIGHTS))it.el.style.display=on.has(id)?'':'none'}
+setInterval(()=>{if(dreaming)return;const D=onDesk();let any=false;
+  for(const c of CANDLES)if(D.includes(c)&&c.st!==2){c.rebuild();c.fl=.86+Math.random()*.16;any=true}
+  if(any)relight()},120);
 
 /* ---------- the dream reel: 3 frames, each holds a guest card + a place card ---------- */
 const FX=126,FY=198;
@@ -1089,8 +1131,8 @@ let relightReq=true;
 function relight(){relightReq=true}
 function relightNow(){
   const D=onDesk();litAt.sig=D.map(L=>L.lid+L.st+','+Math.round(L.x)+','+Math.round(L.y)).join('|');const sd=shadeD.data,gd=glowD.data;
-  const LS=D.map(L=>{const cnd=L===candle,X=Math.round(L.x),Y=Math.round(L.y),ly=cnd?Y+6:Y+39+Math.round(33*LAMP_SC);
-    return {cnd,lx:cnd?X+8:X+52,ly,lv:Math.min(lightDim,cnd?(L.st===2?0:.9*candleFl):LAMP_LV[L.st]),RX:cnd?165:215,RY:cnd?120:105,top:cnd?-99:clamp(ly-70,-99,110),
+  const LS=D.map(L=>{const cnd=!!L.isC,X=Math.round(L.x),Y=Math.round(L.y),ly=cnd?Y+6:Y+39+Math.round(33*LAMP_SC);
+    return {cnd,lx:cnd?X+8:X+52,ly,lv:Math.min(lightDim,cnd?(L.st===2?0:.9*L.fl):LAMP_LV[L.st]),RX:cnd?165:215,RY:cnd?120:105,top:cnd?-99:clamp(ly-70,-99,110),
       col:cnd?[255,150,60]:COS_LIGHT[cos('light')]}}).filter(l=>l.lv>0);   // a high lamp lights the wall as well
   doorField();LW.fill(0);LWM.fill(0);
   LS.forEach((l,n)=>addLight(l.lx,l.ly,l.RX,l.RY,l.top,l.lv,n));
@@ -1351,7 +1393,7 @@ let AT_TAIL={sky:' Everything floated.',school:' Somewhere a bell rang.',home:' 
 let CONTRIB=[];
 async function endNight(){
   CONTRIB=[];
-  busy=true;dreaming=true;$('bubble').style.opacity=0;hideAsk();info();
+  busy=true;dreaming=true;$('bubble').style.opacity=0;hideAsk();info();dreamMusicStart();   // the tape fades out, the dream has its own music
   await think(U.lightsThink);await sleep(400);
   drawDreamBG();const ov=$('dreamov');ov.style.opacity=0;ov.classList.add('on');ov.style.transition='opacity 1.2s';void ov.offsetWidth;ov.style.opacity=1;sfx.dream();
   $('dtext').textContent='';sceneClear();$('scene').classList.remove('on');
@@ -1487,18 +1529,18 @@ function morning(broke){
     ${why?`<p class="res ${ok?'ok':'no'}">${why}</p>`:''}
     ${albNewLine()}<p class="small">${MK.map(row).join(' &nbsp; ')}</p>`;
   paintIcons($('mpaper'));
-  $('nextn').textContent=NIGHT<5?W.nextNight:W.finish;$('again').textContent=W.replay;
+  $('nextn').textContent=NIGHT<5?W.nextNight:W.finish;$('again').textContent=W.replay;$('again').style.display=REPLAYED?'none':'';
   $('morning').classList.add('on');ok?sfx.good():sfx.bad();
 }
 function paintIcons(host){host.querySelectorAll('.ic').forEach(el=>{if(el.firstChild)return;const k=el.dataset.ic;const cv=document.createElement('canvas');cv.width=7;cv.height=7;const c=cv.getContext('2d');
   ICON[k].forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch==='#'){c.fillStyle=MCOL[k];c.fillRect(x,y,1,1)}}));el.appendChild(cv)})}
 function saveWeek(o){try{if(o)localStorage.setItem('morpheus.week',JSON.stringify(o));else localStorage.removeItem('morpheus.week')}catch(e){}}
 function reloadInto(){try{sessionStorage.setItem('morpheus.auto','1')}catch(e){}location.reload()}
-$('again').onclick=()=>reloadInto();                                   // replay: the save still holds the start of this night
+$('again').onclick=()=>{saveWeek({...(SAVE||{night:1,results:[]}),replayed:1});reloadInto()};   // replay: the save still holds the start of this night; once a week
 $('nextn').onclick=()=>{
   if($('nextn').dataset.end){saveWeek(null);return reloadInto()}
   if(NIGHT<5){const C={};MK.forEach(k=>C[k]=clamp(Math.round(50+(S[k]-50)*.6),15,85));   // bars drift back towards the middle overnight
-    saveWeek({night:NIGHT+1,S:C,results:RESULTS});return reloadInto()}
+    saveWeek({night:NIGHT+1,S:C,results:RESULTS,replayed:REPLAYED?1:0});return reloadInto()}
   weekEnd()};
 function weekEnd(){
   const W=WU(),wins=RESULTS.filter(Boolean).length,ei=wins>=5?2:wins>=3?1:0,end=W.endings[ei];albFind('e',String(ei));

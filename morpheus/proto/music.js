@@ -16,9 +16,11 @@ const MUS_T = {
   ja: {empty: t => `カセット「${t}」はからっぽ。proto/music/${t}.mp3 を入れてね`, hint: 'カセットプレーヤー。クリックで音楽をかける／とめる。ほかのカセットは店で。'},
 };
 let mus = null;
-// music starts by itself with the first click of the session, unless the player was switched off last time
-let musWanted = (() => { try { return localStorage.getItem('morpheus.music') !== 'off' } catch (e) { return true } })();
-function musPref(on) { musWanted = on; try { localStorage.setItem('morpheus.music', on ? 'on' : 'off') } catch (e) {} }
+// every night (every page load) the music starts by itself with the first click or key press.
+// Stopping the player silences only the current night: the next one starts with music again.
+let musWanted = true;
+try { localStorage.removeItem('morpheus.music'); sessionStorage.removeItem('morpheus.music') } catch (e) {}
+function musPref(on) { musWanted = on }
 function musAuto(e) { if (e?.target?.closest?.('#player')) return; if (musWanted && !mus && player && cos('player') !== 'no') musicPlay(cos('tape')) }
 addEventListener('pointerdown', musAuto, {once: true, capture: true});
 addEventListener('keydown', musAuto, {once: true, capture: true});                                          // {id, el} for one file, {id, mix} for a folder tape
@@ -26,9 +28,19 @@ const MIX_BUF = {};                                      // url -> loudness gain
 
 /* a folder tape = an endless mix: random order (never the same track twice in a row), each loop repeated
    for ~1-2 minutes, 4 s fade-out, a short pause, the next one fades in. Loudness is evened out by RMS. */
+// the first track is downloaded while the title screen is up, so the music starts the moment the player clicks
+const MIX_PRE = {};
+function mixPrefetch(id) {
+  const T = TAPES[id]; if (!T?.list || MIX_PRE[id]) return;
+  const name = T.list[Math.floor(Math.random() * T.list.length)], url = `music/${T.dir}/${name}.mp3`;
+  MIX_PRE[id] = {name, url, data: fetch(url).then(r => r.arrayBuffer()).catch(() => null)};
+}
 async function mixLoad(url) {
   // decoded songs are big (~50 MB each), so only the loudness is remembered, not the audio
-  const buf = await AC.decodeAudioData(await (await fetch(url)).arrayBuffer());
+  const pre = Object.values(MIX_PRE).find(p => p.url === url && !p.used);
+  let data = pre ? await pre.data : null; if (pre) pre.used = true;
+  if (!data) data = await (await fetch(url)).arrayBuffer();
+  const buf = await AC.decodeAudioData(data);
   if (!MIX_BUF[url]) {
     let sum = 0, n = 0; for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < d.length; i += 64) { sum += d[i] * d[i]; n++ } }
     MIX_BUF[url] = Math.min(2.5, .12 / (Math.sqrt(sum / n) || .1));
@@ -40,7 +52,8 @@ function mixStart(id) {
   const mix = {bus, last: null, src: null, timer: 0, dead: false};
   const next = async () => {
     if (mix.dead) return;
-    const pool = T.list.filter(n => n !== mix.last), name = pool[Math.floor(Math.random() * pool.length)]; mix.last = name;
+    const pre = MIX_PRE[id] && !MIX_PRE[id].used ? MIX_PRE[id].name : null;
+    const pool = T.list.filter(n => n !== mix.last), name = pre || pool[Math.floor(Math.random() * pool.length)]; mix.last = name;
     let tr; try { tr = await mixLoad(`music/${T.dir}/${name}.mp3`) } catch (e) { mix.timer = setTimeout(next, 500); return }
     if (mix.dead) return;
     const s = AC.createBufferSource(), g = AC.createGain(), t = AC.currentTime + .05, len = tr.buf.duration;
@@ -54,9 +67,9 @@ function mixStart(id) {
   next(); return mix;
 }
 
-function musicStop() {
+function musicStop(slow) {
   if (!mus) return;
-  if (mus.mix) { const m = mus.mix; m.dead = true; clearTimeout(m.timer); m.bus.gain.setTargetAtTime(.0001, AC.currentTime, .15); setTimeout(() => { try { m.src?.stop() } catch (e) {} m.bus.disconnect() }, 900) }
+  if (mus.mix) { const m = mus.mix, tc = slow ? 1 : .15; m.dead = true; clearTimeout(m.timer); m.bus.gain.setTargetAtTime(.0001, AC.currentTime, tc); setTimeout(() => { try { m.src?.stop() } catch (e) {} m.bus.disconnect() }, tc * 6000) }
   else mus.el.pause();
   mus = null; player?.rebuild();
 }
@@ -126,4 +139,59 @@ function deskShow() {                                                         //
   mug.el.style.display = cos('mugOn') === 'no' ? 'none' : '';
   lightsShow();
   if (player) { const show = cos('player') !== 'no'; player.el.style.display = show ? '' : 'none'; if (!show) musicStop() }
+}
+
+try { mixPrefetch(cos('tape')) } catch (e) {}
+
+/* =========================================================
+   DREAM MUSIC: a soft lullaby generated on the fly while Mira's dream plays.
+   Slow warm pads (Fmaj7 - Em7 - Dm9 - Cmaj7), a low hum, and a music-box melody of chord tones
+   with a long soft echo. The jazz tape fades out when the dream starts; the next night starts the tape again.
+   ========================================================= */
+let dreamMus = null;
+function dreamMusicStart() {
+  initAudio(); if (dreamMus) return;
+  musicStop(true);
+  const now = AC.currentTime, out = AC.createGain();
+  out.gain.setValueAtTime(.0001, now); out.gain.exponentialRampToValueAtTime(1.8, now + 4); out.connect(musicOut);
+  const dl = AC.createDelay(2), fb = AC.createGain(), lp = AC.createBiquadFilter(), wet = AC.createGain();   // soft echo
+  dl.delayTime.value = .46; fb.gain.value = .42; lp.type = 'lowpass'; lp.frequency.value = 1800; wet.gain.value = .45;
+  dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(wet); wet.connect(out);
+  const padBus = AC.createBiquadFilter(); padBus.type = 'lowpass'; padBus.frequency.value = 900; padBus.Q.value = .3; padBus.connect(out);
+  const boxBus = AC.createGain(); boxBus.connect(out); boxBus.connect(dl);
+  const hz = m => 440 * 2 ** ((m - 69) / 12);
+  const CH = [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60, 64], [48, 52, 55, 59]];
+  const BAR = 5.2;
+  const voice = (type, f, t0, att, len, peak, bus, det = 0) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = f; o.detune.value = det;
+    g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(peak, t0 + att);
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + len);
+    o.connect(g); g.connect(bus); o.start(t0); o.stop(t0 + len + .1);
+  };
+  const box = (f, t0, v) => {                               // a music-box note: sine + a quiet bright partial
+    voice('sine', f, t0, .008, 2.6, .055 * v, boxBus);
+    voice('sine', f * 3, t0, .004, .5, .008 * v, boxBus);
+  };
+  let bar = 0, t = now + .3, last = 0;
+  const sched = () => {
+    while (t < AC.currentTime + BAR * 1.5) {
+      const ch = CH[bar % CH.length];
+      for (const m of ch) { voice('triangle', hz(m - 12), t, 1.8, BAR + 1.6, .03, padBus, -6); voice('triangle', hz(m - 12), t, 2.2, BAR + 1.6, .022, padBus, 7) }
+      voice('sine', hz(ch[0] - 24), t, 1.2, BAR + 1, .07, padBus);
+      const tones = ch.map(m => m + 12).concat(ch.slice(0, 2).map(m => m + 24));
+      for (let k = 0; k < 8; k++) {                          // a slow melody in eighths, never a big leap
+        if (k && Math.random() < .42) continue;
+        let m = tones[Math.floor(Math.random() * tones.length)];
+        if (last && Math.abs(m - last) > 9) m = tones.reduce((a, b) => Math.abs(b - last) < Math.abs(a - last) ? b : a);
+        last = m; box(hz(m), t + k * BAR / 8 + Math.random() * .03, k ? .75 + Math.random() * .25 : 1);
+      }
+      t += BAR; bar++;
+    }
+  };
+  sched(); dreamMus = {out, timer: setInterval(sched, 800)};
+}
+function dreamMusicStop() {
+  if (!dreamMus) return; const d = dreamMus; dreamMus = null; clearInterval(d.timer);
+  d.out.gain.setTargetAtTime(.0001, AC.currentTime, .8); setTimeout(() => d.out.disconnect(), 5000);
 }
