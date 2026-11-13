@@ -305,3 +305,295 @@ ja: {
   },
 },
 };
+
+/* =====================================================================
+   CONSEQUENCES: what earlier nights change in later ones (see morpheus/STORY_MAP.md).
+   brief2: Tuesday's voicemail by Monday's result. fri: Friday's mirror note, assembled.
+   arrive[night][condition][guest]: branch lines; conditions mon/tue/wed/thu . ok/bad/late/high/low.
+   back: the guest was rung away last night. thanks: the guest was in last night's good dream.
+   end: the week's ending, one sentence per storyline, then the memo.
+   ===================================================================== */
+WEEK.en.cons = {
+  brief2: {
+    ok: "“Mira, it's Mom. I hear you knocked them dead! I knew it. I didn't sleep, but I knew. Sunday I'm sixty. Only if you want. …Call me back. Wear something with colour.”",
+    bad: "“Mira, it's Mom. I asked how it went. You wrote ‘fine’. Then ‘fine’. Then ‘fine, Mom’. Sunday I'm sixty. …Call me back. Or don't.”",
+  },
+  fri: {
+    sat: {ok: 'Saturday: class, 10:00.', late: 'Saturday: class, 10:00. (Signed up Thursday. Still counts!)', bad: 'Saturday: nothing.'},
+    sun: {ok: 'Sunday: Mom, 60.', bad: 'Sunday: Mom, 60. Call her???'},
+    mon: {ok: 'Monday: …?', bad: 'Monday: redo the presentation.'},
+    extra: {ok: '', high: ' A sticky note next to it: “Friday: make up for Thursday.”', low: ' Under it, pressed hard: “Biscuit was yesterday. Sorry, boy.”'},
+    wrap: '“{sat} {sun} {mon}”{extra} And smaller, at the bottom: “please let me sleep tonight.”',
+  },
+  arrive: {
+    2: {
+      'mon.ok': {
+        grayline: "Grayline. Good presentation. Too good. She has the Henderson account now. I'd like her well rested and slightly afraid.",
+        dminus: 'Lucky. That was luck. Slide three was right there, waiting. I can wait too.'},
+      'mon.bad': {
+        grayline: "Grayline. After Monday she's on probation. I've brought the paperwork. It's only eleven pages.",
+        dminus: "Slide three. Like question three in ninth grade. Same face, too. I've missed that face."},
+    },
+    3: {
+      'mon.bad': {grayline: "Grayline. A drawing class. Two days after slide three. Let me in, I'll put this on her file."},
+      'tue.ok': {mom: 'Twenty minutes about the cake! Like old times. And now a flyer. Fine. Draw. Just eat something first.'},
+      'tue.bad': {
+        mom: "A cake. A little picture of a cake. I sent a thumb back. I understand emojis now, dear. Don't let me keep you.",
+        grandma: "Valya, fifth floor. A cake picture, to her own mother? I'm the one who sends pictures, dear. Mothers get phone calls."},
+    },
+    4: {
+      'tue.ok': {mom: "She called me again last night. About the cake. Twice. I'm not saying a word about the dog today. I'm learning."},
+      'tue.bad': {mom: 'Nineteen years since the dog. That year she called me every night. Now I get little cakes. Don\'t mind me.'},
+      'wed.ok': {
+        okafor: 'Her name is on the list. Third line, the same slanted letters as at fifteen. I know what tonight is. Let me help with the ears.',
+        comet: "CAPTAIN COMET! Mission report: she SIGNED UP! I've been saluting all day. My arm hurts. Worth it!"},
+      'wed.bad': {
+        okafor: "The list closes today at six. I've kept one place and written her name in pencil. Pencil rubs out. I'd rather it didn't.",
+        comet: "Captain Comet. Mission failed. The flyer is in the bin, under a teabag. But a hero doesn't quit while there's a Thursday!",
+        giveaway: 'MAX GIVEAWAY is BACK! Sign-ups close TODAY, Mira! Fish that flyer out of the bin and win a GALLERY! Bin dive challenge!'},
+    },
+    5: {
+      'mon.bad': {grayline: "Grayline. Monday she redoes the presentation. I've moved it to nine. Earlier is more motivating."},
+      'tue.ok': {mom: "Friday. The cake is in the oven, the one we argued about. She's coming. I've ironed the tablecloth twice."},
+      'tue.bad': {mom: "Friday. I think I'll cancel Sunday. Sixty is just a number. A thumbs up is just a thumb. I'm fine."},
+      'wed.ok': {okafor: "Saturday at ten. Her easel is by the window. I put a pear on the table. Not the same pear. Don't tell her."},
+      'wed.late': {okafor: "She signed up at five to six. Out of breath. Saturday at ten. I've kept the easel by the window."},
+      'wed.bad': {
+        okafor: 'The list closed at six. I rubbed out the pencil. It took a long time. Let me see her tonight, at least in here.',
+        grayline: "Grayline. I hear her Saturday is free. Excellent. I've booked a call at ten. Cameras on."},
+      'thu.ok': {biscuit: '(Woof! He sits as if for a photo. He never once sat for a photo in his life.)'},
+      'thu.high': {
+        biscuit: '(Woof. Very quietly. He lies by the door with his nose on his paws and does not get up.)',
+        grayline: "Grayline. Thursday: absent. No call, no note. I'd like a word with her before Monday. In here."},
+      'thu.low': {
+        biscuit: '(Woof! He sits by the door and waits. He has been waiting since Thursday morning.)',
+        mom: "She forgot the dog's day. It's all right, dear. I forget too. I look for my glasses and they're on my head."},
+    },
+  },
+  back: {
+    sheep: 'Forty-seven. The union has logged last night\'s incident. No hard feelings. Almost.',
+    mom: "You rang a bell at me yesterday, dear. A bell. I've brought you a sandwich anyway. You look thin.",
+    kevin: "You kicked me out yesterday. I brought chips anyway. Barbecue. I don't hold grudges. I forget them.",
+    comet: 'CAPTAIN COMET returns! A hero is never sent home. He just takes a short commercial break!',
+    dminus: 'Rang the bell at me, did you? She tried that too. Fifteen years under the bed. I came back.',
+    grayline: "Grayline. Yesterday you refused me entry. I've noted it. I note everything. Open up.",
+    okafor: "Good evening again. You sent me home last night. That's all right. I'm used to waiting for people to come back.",
+    biscuit: '(Woof! He has brought you the bell. He wants you to throw it.)',
+  },
+  thanks: {
+    sheep: "Forty-seven. Last night she stopped at twelve. The union has nothing to add. That's a first.",
+    mom: "Last night was nice, wasn't it? She smiled in her sleep. I saw. Don't tell her I saw.",
+    kevin: 'Kevin! Last night was great. No idea what happened, but I was there. Chips?',
+    comet: 'CAPTAIN COMET! Last night\'s episode: a hit! Same time tonight, citizen?',
+    dminus: 'Fine. Last night went well. With me in it. Tell no one. I have a reputation.',
+    grayline: 'Grayline. Last night: slept. This morning: on time. No complaints. I have filed that too.',
+    okafor: "Thank you for last night. She held the pencil the old way, little finger out. I'd forgotten she did that.",
+    biscuit: '(Woof! He licks your hand through the window. Then the window. Then your hand again.)',
+  },
+  lateSignup: 'At five to six on Thursday she ran into the art school and went over her pencilled name in pen.',
+  end: {
+    work: {ok: 'On Monday she got past slide three, and somebody nodded.',
+           bad: 'On Monday she froze on slide three, and next Monday she has to do it all again.'},
+    mom: {ok: "She went to Mom's sixtieth wearing something with colour, and Mom fixed her collar only once.",
+          bad: "She missed Mom's sixtieth, called in the evening, and they talked about the weather for four minutes."},
+    art: {ok: 'On Saturday at ten she sat down at an easel and sent Mom a photo of the pear. Mom said it was “not bad”. Coming from Mom, that was a standing ovation.',
+          late: 'On Saturday at ten she sat down at an easel, in the last place on the list.',
+          bad: 'On Saturday at ten she cleaned the fridge. There was a clean rectangle where the flyer had been.'},
+    dog: {ok: "Biscuit's photo moved from a drawer to her desk at work.",
+          high: 'The collar stayed on her pillow all weekend.',
+          low: "She set next year's reminder a day early. Just in case."},
+    sleep: {ok: "On Friday night she slept nine hours and didn't count a single sheep.",
+            bad: 'On Friday night she counted sheep until four. Sheep #47 filed a complaint.'},
+    memo: ['— MEMO: Report to my office, clerk.', '— MEMO: Decent work. There is always next week.', '— MEMO: The Department thanks you, clerk.'],
+  },
+};
+
+WEEK.ru.cons = {
+  brief2: {
+    ok: '«Мира, это мама. Говорят, ты их всех порвала! Я знала. Не спала, но знала. В воскресенье мне шестьдесят. Только если сама захочешь. …Перезвони. И надень что-нибудь яркое».',
+    bad: '«Мира, это мама. Спросила, как прошло, а ты: „нормально“. Потом „нормально“. Потом „нормально, мам“. В воскресенье мне шестьдесят. …Перезвони. Или не перезванивай».',
+  },
+  fri: {
+    sat: {ok: 'Суббота: курсы, 10:00.', late: 'Суббота: курсы, 10:00. (Записалась в четверг. Успела!)', bad: 'Суббота: ничего.'},
+    sun: {ok: 'Воскресенье: мама, 60.', bad: 'Воскресенье: мама, 60. Позвонить???'},
+    mon: {ok: 'Понедельник: …?', bad: 'Понедельник: переделать презентацию.'},
+    extra: {ok: '', high: ' Сбоку стикер: «Пятница: отработать четверг».', low: ' А ниже, с нажимом: «Бисквит был вчера. Прости, малыш».'},
+    wrap: '«{sat} {sun} {mon}»{extra} И внизу, мелко: «пожалуйста, дай мне сегодня поспать».',
+  },
+  arrive: {
+    2: {
+      'mon.ok': {
+        grayline: 'Грейлайн. Выступление визирую. Даже слишком хорошее: передаю ей клиента Хендерсона. Пусть высыпается. И слегка боится.',
+        dminus: 'Повезло. Просто повезло. Третий слайд был совсем рядом. Ничего, я подожду.'},
+      'mon.bad': {
+        grayline: 'Грейлайн. После понедельника она на испытательном. Документы при мне. Всего одиннадцать страниц.',
+        dminus: 'Третий слайд. Как третья задача в девятом классе. И лицо то же. Я по нему скучала.'},
+    },
+    3: {
+      'mon.bad': {grayline: 'Грейлайн. Курсы рисования. Через два дня после третьего слайда. Пустите, внесу в личное дело.'},
+      'tue.ok': {mom: 'Двадцать минут спорили про торт! Как раньше. А теперь флаер. Ну и рисуй. Только покушай сначала.'},
+      'tue.bad': {
+        mom: 'Тортик. Картинка с тортиком. Я ответила лайком. Я теперь разбираюсь в смайликах, милый. Не буду задерживать.',
+        grandma: 'Валя с пятого. Родной матери — картинку с тортом? Картинки, деточка, это я шлю. А матерям звонят.'},
+    },
+    4: {
+      'tue.ok': {mom: 'Она вчера опять звонила. Про торт. Два раза. Про собаку я сегодня молчу. Учусь.'},
+      'tue.bad': {mom: 'Девятнадцать лет как нет собаки. Тогда она звонила мне каждый вечер. А теперь мне тортики присылают. Не обращай внимания.'},
+      'wed.ok': {
+        okafor: 'Её имя в списке. Третья строчка, тот же наклонный почерк, что в пятнадцать. Я знаю, какой сегодня день. Давайте помогу с ушами.',
+        comet: 'КАПИТАН КОМЕТА! Доклад: она ЗАПИСАЛАСЬ! Я весь день отдаю честь. Рука болит. Оно того стоило!'},
+      'wed.bad': {
+        okafor: 'Список закрывается сегодня в шесть. Одно место я придержала, вписала её карандашом. Карандаш стирается. Не хотелось бы.',
+        comet: 'Капитан Комета. Миссия провалена. Флаер в мусорке, под чайным пакетиком. Но герой не сдаётся, пока есть четверг!',
+        giveaway: 'МАКС РОЗЫГРЫШ СНОВА С ВАМИ! Мира, запись закрывается СЕГОДНЯ! Достань флаер из мусорки и выиграй ГАЛЕРЕЮ! Челлендж!'},
+    },
+    5: {
+      'mon.bad': {grayline: 'Грейлайн. В понедельник она переделывает презентацию. Перенёс на девять. Так мотивирует сильнее.'},
+      'tue.ok': {mom: 'Пятница. Торт в духовке, тот самый, про который спорили. Она приедет. Я уже дважды погладила скатерть.'},
+      'tue.bad': {mom: 'Пятница. Наверное, отменю праздник. Шестьдесят — просто цифра. Лайк — просто палец. Я в порядке.'},
+      'wed.ok': {okafor: 'Суббота, десять утра. Её мольберт у окна. Я положила на стол грушу. Не ту же самую. Не говорите ей.'},
+      'wed.late': {okafor: 'Она записалась без пяти шесть. Запыхавшись. Суббота, десять утра. Мольберт у окна я придержала.'},
+      'wed.bad': {
+        okafor: 'Список закрылся в шесть. Карандаш я стёрла. Долго стирала. Пустите хотя бы сюда, во сон.',
+        grayline: 'Грейлайн. Слышал, суббота у неё свободна. Отлично. Поставил созвон на десять. С камерами.'},
+      'thu.ok': {biscuit: '(Гав! Сидит, как для фотографии. Хотя за всю жизнь ни разу не усидел для фотографии.)'},
+      'thu.high': {
+        biscuit: '(Гав. Совсем тихо. Лежит у двери, положив нос на лапы, и не встаёт.)',
+        grayline: 'Грейлайн. Четверг: отсутствие без уважительной причины. Ни звонка, ни справки. Пустите. Поговорим до понедельника.'},
+      'thu.low': {
+        biscuit: '(Гав! Сидит у двери и ждёт. Ждёт с утра четверга.)',
+        mom: 'Забыла про собаку. Ничего, милый, я тоже забываю. Вот очки ищу, а они на голове.'},
+    },
+  },
+  back: {
+    sheep: 'Сорок семь. Профсоюз зафиксировал вчерашнее. Без обид. Почти.',
+    mom: 'Вчера ты меня выставил колокольчиком, милый. Колокольчиком! А я тебе всё равно бутерброд принесла. Совсем исхудал.',
+    kevin: 'Ты меня вчера выгнал. Я всё равно принёс чипсы. Барбекю. Я не обижаюсь. Я забываю.',
+    comet: 'КАПИТАН КОМЕТА снова здесь! Героев не выгоняют. У них просто рекламная пауза!',
+    dminus: 'Колокольчиком меня, значит? Она тоже пробовала. Пятнадцать лет под кроватью. А я вернулась.',
+    grayline: 'Грейлайн. Вчера мне отказали в допуске. Я это зафиксировал. Я всё фиксирую. Открывайте.',
+    okafor: 'Добрый вечер. Вчера вы отправили меня домой. Ничего. Я привыкла ждать, когда люди вернутся.',
+    biscuit: '(Гав! Он принёс тебе колокольчик. Хочет, чтобы ты его бросил.)',
+  },
+  thanks: {
+    sheep: 'Сорок семь. Вчера она остановилась на двенадцати. Профсоюзу нечего добавить. Впервые.',
+    mom: 'Хорошо вчера было, да? Она во сне улыбалась. Я видела. Только ей не говори.',
+    kevin: 'Кевин! Вчера было здорово. Не знаю, что было, но я там был. Чипсы?',
+    comet: 'КАПИТАН КОМЕТА! Вчерашняя серия — хит! Сегодня в то же время, гражданин?',
+    dminus: 'Ладно. Вчера всё прошло хорошо. Со мной. Только никому, у меня репутация.',
+    grayline: 'Грейлайн. Ночью: спала. Утром: вовремя. Замечаний нет. Это я тоже подшил.',
+    okafor: 'Спасибо за вчера. Она держала карандаш по-старому, оттопырив мизинец. Я и забыла, что она так делает.',
+    biscuit: '(Гав! Лижет тебе руку через окошко. Потом окошко. Потом опять руку.)',
+  },
+  lateSignup: 'В четверг без пяти шесть она прибежала в художку и обвела ручкой своё имя, вписанное карандашом.',
+  end: {
+    work: {ok: 'В понедельник она проскочила третий слайд, и кто-то даже кивнул.',
+           bad: 'В понедельник она застыла на третьем слайде, и в следующий понедельник всё придётся повторить.'},
+    mom: {ok: 'На мамино шестидесятилетие она пришла в ярком, и мама поправила ей воротник всего один раз.',
+          bad: 'На мамино шестидесятилетие она не поехала, а вечером позвонила, и они четыре минуты говорили о погоде.'},
+    art: {ok: 'В субботу в десять она села за мольберт и отправила маме фото груши. Мама сказала, что рисунок «ничего». Для мамы это — овация стоя.',
+          late: 'В субботу в десять она села за мольберт, на последнее место в списке.',
+          bad: 'В субботу в десять она мыла холодильник. На дверце остался чистый прямоугольник от флаера.'},
+    dog: {ok: 'Фото Бисквита переехало из ящика к ней на рабочий стол.',
+          high: 'Ошейник так и пролежал у неё на подушке все выходные.',
+          low: 'Напоминание на следующий год она поставила на день раньше. На всякий случай.'},
+    sleep: {ok: 'В пятницу она проспала девять часов и не посчитала ни одной овцы.',
+            bad: 'В пятницу она считала овец до четырёх утра. Овца №47 подала жалобу.'},
+    memo: ['— ЗАПИСКА: Зайдите ко мне, клерк.', '— ЗАПИСКА: Неплохо. Всегда есть следующая неделя.', '— ЗАПИСКА: Департамент благодарит вас, клерк.'],
+  },
+};
+
+WEEK.ja.cons = {
+  brief2: {
+    ok: '「ミラ、ママよ。みんなをうならせたんですって？わかってたわ。眠れなかったけど、わかってたの。日曜でママは六十よ。来たければでいいの。……折り返して。色のある服を着てきなさい。」',
+    bad: '「ミラ、ママよ。どうだったって聞いたら『大丈夫』。それから『大丈夫』。それから『大丈夫だってば』。日曜でママは六十よ。……折り返して。しなくてもいいけど。」',
+  },
+  fri: {
+    sat: {ok: '土曜：教室 10:00。', late: '土曜：教室 10:00。（木曜にすべりこみ！）', bad: '土曜：なし。'},
+    sun: {ok: '日曜：ママ、60。', bad: '日曜：ママ、60。電話……する？'},
+    mon: {ok: '月曜：……？', bad: '月曜：プレゼンやり直し。'},
+    extra: {ok: '', high: '横に付箋：「金曜：木曜の分をとりかえす」。', low: 'その下に、筆圧の強い字で：「ビスケット、きのうだった。ごめんね」。'},
+    wrap: '「{sat}{sun}{mon}」{extra}そして下に小さく：「今夜はどうか眠らせて」',
+  },
+  arrive: {
+    2: {
+      'mon.ok': {
+        grayline: 'グレイラインだ。プレゼンはよかった。よすぎた。ヘンダーソンの案件は彼女に任せる。よく眠り、少しおびえていてほしい。',
+        dminus: 'まぐれだ。ただのまぐれ。三枚目のスライド、あとちょっとだったのにな。いいさ、待ってやる。'},
+      'mon.bad': {
+        grayline: 'グレイラインだ。月曜の件で、彼女には始末書を書いてもらう。用紙は持ってきた。たった十一枚だ。',
+        dminus: '三枚目のスライド。中3の第三問と同じだ。顔も同じ。あの顔、なつかしいな。'},
+    },
+    3: {
+      'mon.bad': {grayline: 'グレイラインだ。三枚目のスライドの二日後に、デッサン教室か。入れてくれ。記録に残す。'},
+      'tue.ok': {mom: 'ケーキのことで二十分も言い合ったのよ！昔みたいに。今度はチラシ？いいわよ、描きなさい。その前にちゃんと食べるのよ。'},
+      'tue.bad': {
+        mom: 'ケーキの絵文字。小さいケーキの絵。ママは親指を返したわ。もう絵文字くらいわかるのよ。引きとめないわ。',
+        grandma: '五階のワーリャよ。実のお母さんにケーキの絵だけ？絵を送るのはわたしの役目よ、お嬢ちゃん。お母さんには電話するものなの。'},
+    },
+    4: {
+      'tue.ok': {mom: 'ゆうべもまた電話をくれたの。ケーキのことで。二回も。今日は犬の話はしないわ。ママも勉強中なの。'},
+      'tue.bad': {mom: '犬がいなくなって十九年。あのころは毎晩電話してきたのに。今はケーキの絵ね。気にしないで。'},
+      'wed.ok': {
+        okafor: '名簿にあの子の名前がありました。三行目。十五のときと同じ、右にかたむいた字で。今夜が何の日かは知っています。耳を描くのを手伝わせて。',
+        comet: 'キャプテン・コメット、参上！報告だ：彼女が申しこんだ！一日じゅう敬礼していた。腕が痛い。悔いはない！'},
+      'wed.bad': {
+        okafor: '名簿は今日の六時でしめきりです。一席とってあります。鉛筆で名前を書いておいたの。鉛筆は消せるけれど、消したくないわ。',
+        comet: 'キャプテン・コメットだ。ミッション失敗。チラシはゴミ箱の中、ティーバッグの下だ。だが木曜があるかぎり、ヒーローはあきらめない！',
+        giveaway: 'マックス・ギブアウェイ、復活！ミラ、申し込みは今日まで！ゴミ箱からチラシを救出してギャラリーをゲット！ゴミ箱ダイブチャレンジ！'},
+    },
+    5: {
+      'mon.bad': {grayline: 'グレイラインだ。月曜はプレゼンのやり直しだ。九時に早めた。早いほうが身が入る。'},
+      'tue.ok': {mom: '金曜日。ケーキはオーブンの中。言い合った、あのケーキよ。あの子が来るの。テーブルクロスにもう二回アイロンかけたわ。'},
+      'tue.bad': {mom: '金曜日。誕生日会、やめようかしら。六十なんてただの数字。いいねもただの親指よ。ママは平気。'},
+      'wed.ok': {okafor: '土曜の十時。あの子のイーゼルは窓ぎわです。机に洋なしを置きました。あのときのとは別の洋なし。内緒にしてね。'},
+      'wed.late': {okafor: 'あの子、六時五分前に申しこんだの。息を切らして。土曜の十時。窓ぎわのイーゼル、とっておきました。'},
+      'wed.bad': {
+        okafor: '名簿は六時にしめきりました。鉛筆の名前は消しました。時間がかかったわ。せめて夢の中で会わせて。',
+        grayline: 'グレイラインだ。土曜があいているそうだな。けっこう。十時に会議を入れた。カメラはオンで。'},
+      'thu.ok': {biscuit: '（ワン！写真をとるみたいにおすわりしている。生きていたころは、一度もじっとしなかったのに。）'},
+      'thu.high': {
+        biscuit: '（ワン。ごく小さく。ドアのそばで前足にあごをのせて、起きあがらない。）',
+        grayline: 'グレイラインだ。木曜、無断欠勤。電話一本なし。月曜の前に話がある。入れたまえ。'},
+      'thu.low': {
+        biscuit: '（ワン！ドアのそばにすわって待っている。木曜の朝から、ずっと。）',
+        mom: '犬の日、忘れてたのね。いいのよ。ママもよく忘れるの。めがねを探してたら頭の上にあったりね。'},
+    },
+  },
+  back: {
+    sheep: 'ひつじ47号です。昨夜の件は組合で記録しました。うらみはありません。ほぼ。',
+    mom: 'きのうはベルで追い返されたわね。ベルで。それでもサンドイッチ持ってきたわ。やせたんじゃない？',
+    kevin: 'きのう追い出されたよね。でもポテチ持ってきた。バーベキュー味。根に持たないんだ。忘れるから。',
+    comet: 'キャプテン・コメット、ふたたび参上！ヒーローは追い返されない。CMをはさんだだけだ！',
+    dminus: 'ベルでおれを追い返したって？あいつもやったさ。十五年ベッドの下。それでも戻ってきた。',
+    grayline: 'グレイラインだ。きのうは入室を断られた。記録してある。すべて記録している。開けたまえ。',
+    okafor: 'こんばんは、また来ました。きのうは帰されましたね。いいんです。人がもどってくるのを待つのには慣れているの。',
+    biscuit: '（ワン！ベルをくわえて持ってきた。投げてほしいらしい。）',
+  },
+  thanks: {
+    sheep: 'ひつじ47号です。昨夜は十二で止まりました。組合から言うことはありません。初めてです。',
+    mom: 'ゆうべはよかったわね。あの子、寝ながら笑ってた。見たのよ。言わないでね。',
+    kevin: 'ケビン！ゆうべ、よかったね。何があったかは知らないけど、ぼくもいた。ポテチいる？',
+    comet: 'キャプテン・コメット、参上！昨夜の回は大ヒットだ！今夜も同じ時間に、だな！',
+    dminus: 'ふん。ゆうべはうまくいった。おれがいたのにな。だれにも言うなよ。評判ってもんがある。',
+    grayline: 'グレイラインだ。夜は眠った。朝は定時。問題なし。それも記録した。',
+    okafor: 'ゆうべはありがとう。あの子、むかしと同じに小指を立てて鉛筆を持っていたの。忘れていたわ。',
+    biscuit: '（ワン！窓口ごしに手をなめる。それから窓口を。それからまた手を。）',
+  },
+  lateSignup: '木曜の六時五分前、ミラは教室にかけこんで、鉛筆の名前をペンでなぞった。',
+  end: {
+    work: {ok: '月曜、三枚目のスライドを乗りこえた。うなずいてくれた人もいた。',
+           bad: '月曜、三枚目のスライドで固まった。来週の月曜に、もう一度やり直す。'},
+    mom: {ok: 'ママの六十の誕生日には色のある服で行った。ママがえりを直したのは一回だけだった。',
+          bad: 'ママの六十の誕生日には行かなかった。夜に電話して、四分間、天気の話をした。'},
+    art: {ok: '土曜の十時、イーゼルの前に座り、洋なしの絵の写真をママに送った。ママは「悪くない」と言った。ママにしては、総立ちの拍手だった。',
+          late: '土曜の十時、名簿の最後のひと枠で、イーゼルの前に座った。',
+          bad: '土曜の十時、冷蔵庫をふいていた。チラシのあとだけ、四角くきれいだった。'},
+    dog: {ok: 'ビスケットの写真は、引き出しから会社の机の上にうつった。',
+          high: '首輪は週末のあいだずっと、まくらの上にあった。',
+          low: '来年のリマインダーは、一日早く設定した。念のため。'},
+    sleep: {ok: '金曜の夜は九時間眠った。ヒツジは一匹も数えなかった。',
+            bad: '金曜の夜は朝四時までヒツジを数えた。ひつじ47号が苦情を出した。'},
+    memo: ['— 通達：係員、私の部屋に来なさい。', '— 通達：まずまずだ。来週もある。', '— 通達：局より感謝する、係員。'],
+  },
+};

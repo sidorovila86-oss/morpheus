@@ -91,3 +91,23 @@ Mark a line with ✅ if it's fine. Otherwise write your version next to it.
 | | English | 日本語 |
 |---|---|---|
 | Morning line | In the morning she caught herself thinking: “Maybe I should work this weekend.” It didn't feel like her own thought. | 朝、ふと思った。「今週末、休日出勤しようかな」。なんだか自分の考えじゃない気がした。 |
+
+---
+
+# Consequences between nights (week.js `WEEK.ja.cons`)
+
+Lines that change depending on how earlier nights went. Please check:
+
+- **Grayline, Tue after a failed Monday**: 始末書 for "probation paperwork". Is it natural for a boss to bring 始末書 forms (11 pages as the joke)?
+- **Mom's voicemail, Tue (bad)**: 『大丈夫』 → 『大丈夫』 → 『大丈夫だってば』. Does the escalation read as a daughter brushing her mom off?
+- **Mom (ok)**: 「〜んですって？」 for "I hear you…". Natural for a mother on voicemail?
+- **Mom, cake emoji**: 親指を返した ("sent a thumb back") and later いいねもただの親指. Would a Japanese mom say 親指 or いいね / グッドのスタンプ?
+- **Grandma Valya**: calls Mira お嬢ちゃん. Too old-fashioned or fine for a neighbour lady?
+- **Friday mirror note**: すべりこみ (late sign-up), 電話……する？, 筆圧の強い字で. Does it read like a real note-to-self?
+- **Okafor's pencil thread** (Thu/Fri): name written in pencil, then erased. Is 鉛筆は消せるけれど、消したくないわ clear?
+- **Captain Comet**: CMをはさんだだけだ ("just a commercial break"). Does the TV-hero joke work?
+- **D-minus**: 中3の第三問 (EN says 9th grade = 中3). And おれがいたのにな in the thanks line: should it be おれがいたからな?
+- **Sheep name**: week.js nights use 47番 casually, lang.js uses ひつじ47号です. The new lines use ひつじ47号. Pick one form for the whole game.
+- **Biscuit**: 生きていたころは、一度もじっとしなかったのに. Too blunt for the tone, or right?
+- **Ending, art**: 洋なしの絵の写真をママに送った / 総立ちの拍手 for "standing ovation". Natural?
+- **Ending, mom**: 四分間、天気の話をした. OK as a quiet sad beat?

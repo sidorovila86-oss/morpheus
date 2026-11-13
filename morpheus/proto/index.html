@@ -304,6 +304,16 @@ let SAVE=null;try{SAVE=JSON.parse(localStorage.getItem('morpheus.week')||'null')
 const NIGHT=SAVE&&SAVE.night>=1&&SAVE.night<=5?SAVE.night:1;
 const RESULTS=SAVE&&Array.isArray(SAVE.results)?SAVE.results.slice(0,NIGHT-1):[];
 const REPLAYED=!!(SAVE&&SAVE.replayed);   // one replay of a night per week
+/* ---------- the week remembers: every night leaves {r: ok|bad|high|low|broke, in: guests in the dream,
+   out: guests rung away, agent: he got in, late: signed up for the class on Thursday after all} ---------- */
+const HIST=SAVE&&Array.isArray(SAVE.hist)?SAVE.hist.slice(0,NIGHT-1):[];
+const OUT=[];                                  // rung away tonight
+const STORY={};                                // what earlier nights decided, as words the texts are keyed by
+{const r=i=>HIST[i]?.r??(RESULTS[i]?'ok':'');   // saves from before the week remembered fall back to ✔/✘
+ if(NIGHT>1)STORY.mon=r(0)==='ok'?'ok':'bad';
+ if(NIGHT>2)STORY.tue=r(1)==='ok'?'ok':'bad';
+ if(NIGHT>3)STORY.wed=r(2)==='ok'?'ok':HIST[3]?.late?'late':'bad';
+ if(NIGHT>4)STORY.thu=r(3)==='ok'?'ok':r(3)==='high'?'high':'low';}
 const NIGHTS=[
  {film:3,queue:['sheep','mom','shonen','dminus','agent','biscuit','giveaway','kevin','comet'],
   goal:{test:S=>S.fear<50,k:'fear',dir:-1}},                                              // Mon: presentation -> calm
@@ -436,6 +446,14 @@ const V=[
  {id:'agent4',agent:1,of:'grayline',copy:1,pitch:200,eff:{past:-15,fear:10}},
  {id:'agent5',agent:1,of:'kevin',copy:1,pitch:420,eff:{fear:10,hope:-10,love:-5}},
 ];
+{const Q=NT.queue,E=NT.eff=NT.eff||{},put=(id,after)=>{if(!Q.includes(id))Q.splice(Q.indexOf(after)+1,0,id)};
+  if(NIGHT===2){put('grayline','kevin');E.grayline=STORY.mon==='ok'?{fear:15,hope:-5,love:-5}:{fear:20,hope:-10};   // Monday: a new account, or probation
+    if(STORY.mon==='bad')E.dminus={fear:20,love:-5}}                                                                  // "slide three. Like ninth grade."
+  if(NIGHT===3){if(STORY.tue==='ok')E.mom={love:10};else{E.mom={love:5,hope:-15};put('grandma','mom')}}             // after the call Mom stops criticising
+  if(NIGHT===4){E.mom=STORY.tue==='ok'?{past:10,love:15}:{past:10,love:5};
+    if(STORY.wed==='ok')E.okafor={past:10,hope:10,love:5};else put('giveaway','grayline')}                          // last chance to win a "gallery"
+  if(NIGHT===5){if(STORY.thu==='high')E.grayline={fear:20,hope:-5,love:-5};if(STORY.tue==='ok')E.mom={love:15,fear:-5}}
+  if(HIST[NIGHT-2]?.agent&&Q.includes('grayline')){const g=E.grayline||{fear:15,hope:-10};E.grayline={...g,fear:(g.fear||0)+5}}}   // the spy's report reached the boss
 {const POOL=V.splice(0);NT.queue.forEach(id=>{const b=POOL.find(v=>v.id===id);V.push({...b,eff:NT.eff&&id in NT.eff?NT.eff[id]:b.eff})})}
 const COMBOS={
  'comet+dminus':{t:"Captain Comet defeated the D-minus with a punch made of pure Saturday morning.",e:{fear:-15,hope:10}},
@@ -1295,7 +1313,7 @@ async function admit(){
   $('bubble').style.opacity=0;cur=null;nextVisitor();
 }
 async function dismiss(){
-  if(!cur||!ticket)return;const v=cur,tk=ticket;ticket=null;busy=true;preview(null);hideAsk();
+  if(!cur||!ticket)return;const v=cur,tk=ticket;ticket=null;busy=true;preview(null);hideAsk();OUT.push(v.id);
   tk.o.locked=()=>true;tk.tx=230;tk.ty=96;sfx.away();
   await say(v.name,v.id==='biscuit'?U.byeDog:v.id==='kevin'?U.byeKevin:U.bye,v.pitch);
   if(v.caught){albFind('d',v.agent?'agent':v.id);think(v.caught)}
@@ -1502,7 +1520,10 @@ async function unmask(a){sfx.poof();shake(3,250);a.classList.add('poof');
   await sleep(220);a.querySelector('img').src='../art/px/out/v_agent.png';await sleep(500);a.classList.remove('poof')}
 function morning(broke){
   const N=WN(),W=WU(),g=NT.goal,ok=!broke.length&&g.test(S);
-  let main=ok?N.ok:N.bad;if(!ok&&!broke.length&&N.high)main=S.past>65?N.high:N.low;
+  let main=ok?N.ok:N.bad;if(!ok&&!broke.length&&N.high)main=S.past>65?N.high:N.low;main=main||N.low;
+  const inDream=frames.filter(f=>f.t).map(f=>f.t.v.id);
+  const late=NIGHT===4&&STORY.wed==='bad'&&ok&&inDream.includes('okafor');   // the list closed today; Okafor kept her a place
+  HIST[NIGHT-1]={r:broke.length?'broke':ok?'ok':NIGHT===4?(S.past>65?'high':'low'):'bad',in:inDream,out:OUT.slice(),agent:frames.some(f=>f.t&&f.t.v.agent),late};
   const L=[];
   if(broke.length){
     if(broke.includes('fear')&&S.fear>=100)L.push(U.mFear100);
@@ -1511,6 +1532,7 @@ function morning(broke){
     if(broke.includes('love')&&S.love>=100)L.push(U.mLove100);
     if(!L.length)L.push(W.broke)}
   L.push(main);
+  if(late&&WEEK[LANG].cons?.lateSignup)L.push(WEEK[LANG].cons.lateSignup);
   if(frames.some(f=>f.t&&f.t.v.agent))L.push(U.mAgent);   // the agent got in: Grayline's idea is in her head now
   if(!broke.length){
     if(S.hope>=65&&NIGHT!==3)L.push(U.mHope);
@@ -1540,10 +1562,14 @@ $('again').onclick=()=>{saveWeek({...(SAVE||{night:1,results:[]}),replayed:1});r
 $('nextn').onclick=()=>{
   if($('nextn').dataset.end){saveWeek(null);return reloadInto()}
   if(NIGHT<5){const C={};MK.forEach(k=>C[k]=clamp(Math.round(50+(S[k]-50)*.6),15,85));   // bars drift back towards the middle overnight
-    saveWeek({night:NIGHT+1,S:C,results:RESULTS,replayed:REPLAYED?1:0});return reloadInto()}
+    if(NIGHT===4&&HIST[3]?.r==='low')C.past=clamp(C.past+10,15,85);   // she forgot the dog's day; Friday starts with the guilt
+    saveWeek({night:NIGHT+1,S:C,results:RESULTS,replayed:REPLAYED?1:0,hist:HIST});return reloadInto()}
   weekEnd()};
 function weekEnd(){
-  const W=WU(),wins=RESULTS.filter(Boolean).length,ei=wins>=5?2:wins>=3?1:0,end=W.endings[ei];albFind('e',String(ei));
+  const W=WU(),wins=RESULTS.filter(Boolean).length,ei=wins>=5?2:wins>=3?1:0;albFind('e',String(ei));
+  let end=W.endings[ei];const E=WEEK[LANG].cons?.end,r=i=>HIST[i]?.r??(RESULTS[i]?'ok':''),sp=LANG==='ja'?'':' ';
+  if(E)end=[E.work[r(0)==='ok'?'ok':'bad'],E.mom[r(1)==='ok'?'ok':'bad'],E.art[r(2)==='ok'?'ok':HIST[3]?.late?'late':'bad'],
+    E.dog[r(3)==='ok'?'ok':r(3)==='high'?'high':'low'],E.sleep[r(4)==='ok'?'ok':'bad']].join(sp)+' '+E.memo[ei];
   $('mpaper').innerHTML=`<h2>${W.weekTitle}</h2><p class="small">${WEEK[LANG].nights.map((n,i)=>`${RESULTS[i]?'✔':'✘'} ${n.day}`).join(' &nbsp; ')}</p><p>${end}</p>${albNewLine()}`;
   $('again').style.display='none';$('nextn').textContent=W.newWeek;$('nextn').dataset.end='1';sfx.page();
 }
@@ -1566,14 +1592,23 @@ function applyLang(l){
   $('ask').textContent=U.ask;checkBtn();if($('quiz').style.display==='block')quizRender();$('lights').textContent=U.lights;$('memoBody').innerHTML=memoHTML();$('memook').textContent=U.ok;
   $('bprev').textContent=U.prev;$('bclose').textContent=U.close;$('bnext').textContent=U.next;$('dtitle').textContent=WU().dtitleN(NIGHT);$('again').textContent=WU().replay;
   {const A=WN().arrive||{};V.forEach(v=>{if(A[v.id])v.arrive=A[v.id]})}
+  {const C=WEEK[l].cons;if(C){const B=C.arrive?.[NIGHT]||{},br=new Set(),prev=HIST[NIGHT-2];
+    for(const k of ['mon','tue','wed','thu'])if(STORY[k]){const o=B[k+'.'+STORY[k]];if(o)V.forEach(v=>{if(o[v.id]){v.arrive=o[v.id];br.add(v.id)}})}
+    if(prev)V.forEach(v=>{if(prev.out?.includes(v.id)&&C.back?.[v.id])v.arrive=C.back[v.id];
+      else if(!br.has(v.id)&&prev.r==='ok'&&prev.in?.includes(v.id)&&C.thanks?.[v.id])v.arrive=C.thanks[v.id]})}}
   $('malb').textContent=AT_().open;menuLabels();
   meterLabels(gauge.el);meterLabels($('g2wrap'));info();
   document.querySelectorAll('#langs .btn').forEach(b=>b.classList.toggle('cur',b.dataset.lang===l));
 }
 applyLang(LANG);
 
+function briefNow(){const N=WN(),C=WEEK[LANG].cons;if(!C)return N.brief;
+  if(NIGHT===2&&C.brief2)return C.brief2[STORY.mon];
+  if(NIGHT===5&&C.fri){const F=C.fri,x=F.extra[STORY.thu]||'';
+    return F.wrap.replace('{sat}',F.sat[STORY.wed]).replace('{sun}',F.sun[STORY.tue]).replace('{mon}',F.mon[STORY.mon]).replace('{extra}',x)}
+  return N.brief}
 function memoHTML(){const W=WU(),N=WN();
-  return `<h2>${W.nightHead(NIGHT,N.day)}</h2><p class="clue">${N.clue}:</p><p class="diary">${N.brief}</p>`+
+  return `<h2>${W.nightHead(NIGHT,N.day)}</h2><p class="clue">${N.clue}:</p><p class="diary">${briefNow()}</p>`+
     (NIGHT===1?W.tutorial:(NF>NIGHTS[NIGHT-2].film?W.filmGrew(NF):'')+W.later)}
 $('memook').onclick=()=>{initAudio();$('memo').classList.remove('on');sfx.drop();think(WU().memoThinkN[NIGHT-1]);setTimeout(nextVisitor,600)};
 // coming from "next night" / "replay": skip the title screen
